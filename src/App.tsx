@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import Exercises from "./pages/Exercises";
+import ExerciseDetail from "./pages/ExerciseDetail";
+import WorkoutLog from "./pages/WorkoutLog";
+import AiCoach from "./pages/AiCoach";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +23,12 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/exercises" element={<Exercises />} />
+          <Route path="/exercise/:id" element={<ExerciseDetail />} />
+          <Route path="/workout-log" element={<WorkoutLog />} />
+          <Route path="/ai-coach" element={<AiCoach />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
