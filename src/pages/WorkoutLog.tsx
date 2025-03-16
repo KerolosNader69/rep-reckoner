@@ -16,9 +16,9 @@ import { supabase, WorkoutEntry } from "@/lib/supabase";
 
 const formSchema = z.object({
   exercise: z.string().min(1, { message: "Exercise name is required" }),
-  sets: z.string().transform(val => Number(val)),
-  reps: z.string().transform(val => Number(val)),
-  weight: z.string().transform(val => Number(val)),
+  sets: z.coerce.number().min(1, { message: "At least 1 set is required" }),
+  reps: z.coerce.number().min(1, { message: "At least 1 rep is required" }),
+  weight: z.coerce.number().min(0, { message: "Weight must be 0 or greater" }),
   weightUnit: z.enum(["kg", "lbs"]),
 });
 
@@ -83,9 +83,9 @@ const WorkoutLog = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       exercise: "",
-      sets: "3",
-      reps: "10",
-      weight: "0",
+      sets: 3,
+      reps: 10,
+      weight: 0,
       weightUnit: "kg",
     },
   });
@@ -106,9 +106,9 @@ const WorkoutLog = () => {
         user_id: user.id,
         date: new Date().toISOString(),
         exercise: values.exercise,
-        sets: Number(values.sets),
-        reps: Number(values.reps),
-        weight: Number(values.weight),
+        sets: values.sets,
+        reps: values.reps,
+        weight: values.weight,
         weightUnit: values.weightUnit,
       };
       
