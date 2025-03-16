@@ -68,13 +68,14 @@ const WorkoutLog = () => {
   });
 
   const onSubmit = (values: FormValues) => {
+    // Fix: Use proper type conversion for sets, reps, and weight
     const newWorkout: WorkoutEntry = {
       id: Date.now(),
       date: new Date(),
       exercise: values.exercise,
-      sets: values.sets,
-      reps: values.reps,
-      weight: values.weight,
+      sets: Number(values.sets),
+      reps: Number(values.reps),
+      weight: Number(values.weight),
       weightUnit: values.weightUnit,
     };
     
