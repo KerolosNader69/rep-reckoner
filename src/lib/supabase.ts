@@ -1,36 +1,27 @@
 
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
-// Default values for development (these will be replaced by environment variables in production)
-const defaultSupabaseUrl = 'https://your-supabase-project.supabase.co';
-const defaultSupabaseKey = 'your-anon-key';
+// Use the Supabase client from the integrations folder
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-// Use environment variables if available, otherwise use defaults (to prevent errors during development)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || defaultSupabaseUrl;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || defaultSupabaseKey;
-
-// Display a warning if using default values
-if (supabaseUrl === defaultSupabaseUrl || supabaseAnonKey === defaultSupabaseKey) {
-  console.warn('Using default Supabase credentials. For production, set up your Supabase project and add the keys to your environment variables.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = supabaseClient;
 
 export type WorkoutEntry = {
-  id: number;
+  id: string;
   user_id: string;
   date: Date;
   exercise: string;
   sets: number;
   reps: number;
   weight: number;
-  weightUnit: "kg" | "lbs";
+  weight_unit: string;
   created_at?: string;
 };
 
 export type UserProfile = {
   id: string;
-  username: string;
-  email: string;
+  username: string | null;
+  email: string | null;
   created_at?: string;
 };

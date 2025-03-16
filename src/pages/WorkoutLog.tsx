@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Calendar, Trash2 } from "lucide-react";
@@ -109,7 +108,7 @@ const WorkoutLog = () => {
         sets: values.sets,
         reps: values.reps,
         weight: values.weight,
-        weightUnit: values.weightUnit,
+        weight_unit: values.weightUnit,
       };
       
       const { data, error } = await supabase
@@ -147,7 +146,7 @@ const WorkoutLog = () => {
     }
   };
 
-  const deleteWorkout = async (id: number) => {
+  const deleteWorkout = async (id: string) => {
     try {
       const { error } = await supabase
         .from('workouts')
