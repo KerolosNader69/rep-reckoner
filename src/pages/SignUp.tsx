@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Lock, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -23,6 +24,9 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const SignUp = () => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,12 +37,63 @@ const SignUp = () => {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log(values);
-    toast({
-      title: "Account Created",
-      description: "This is a demo. Account creation will be implemented in the future.",
-    });
+  const onSubmit = async (values: FormValues) => {
+    try {
+      setIsLoading(true);
+      
+      // Register the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            name: values.name,
+          }
+        }
+      });
+
+      if (authError) {
+        toast({
+          title: "Registration Failed",
+          description: authError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (authData.user) {
+        // Create a profile entry in the profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            { 
+              id: authData.user.id, 
+              username: values.name,
+              email: values.email
+            }
+          ]);
+
+        if (profileError) {
+          console.error("Profile creation error:", profileError);
+        }
+
+        toast({
+          title: "Account Created",
+          description: "Your account has been successfully created. Please check your email for verification.",
+        });
+        
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Registration Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -146,8 +201,8 @@ const SignUp = () => {
               )}
             />
             
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-              Create Account
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+              {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
         </Form>

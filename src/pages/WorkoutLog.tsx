@@ -1,7 +1,7 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Calendar, BarChart, Trash2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Plus, Calendar, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/components/ui/use-toast";
+import { supabase, WorkoutEntry } from "@/lib/supabase";
 
 const formSchema = z.object({
   exercise: z.string().min(1, { message: "Exercise name is required" }),
@@ -23,38 +24,60 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-type WorkoutEntry = {
-  id: number;
-  date: Date;
-  exercise: string;
-  sets: number;
-  reps: number;
-  weight: number;
-  weightUnit: "kg" | "lbs";
-};
-
 const WorkoutLog = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [workouts, setWorkouts] = useState<WorkoutEntry[]>([
-    {
-      id: 1,
-      date: new Date(Date.now() - 86400000),
-      exercise: "Barbell Bench Press",
-      sets: 3,
-      reps: 10,
-      weight: 80,
-      weightUnit: "kg",
-    },
-    {
-      id: 2,
-      date: new Date(),
-      exercise: "Squats",
-      sets: 4,
-      reps: 8,
-      weight: 100,
-      weightUnit: "kg",
-    },
-  ]);
+  const [workouts, setWorkouts] = useState<WorkoutEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+      
+      setUser(session.user);
+      fetchWorkouts(session.user.id);
+    };
+    
+    checkUser();
+  }, [navigate]);
+
+  const fetchWorkouts = async (userId: string) => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setWorkouts(data.map(workout => ({
+          ...workout,
+          date: new Date(workout.date)
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching workouts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load your workout data.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -67,34 +90,87 @@ const WorkoutLog = () => {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    // Fix: Use proper type conversion for sets, reps, and weight
-    const newWorkout: WorkoutEntry = {
-      id: Date.now(),
-      date: new Date(),
-      exercise: values.exercise,
-      sets: Number(values.sets),
-      reps: Number(values.reps),
-      weight: Number(values.weight),
-      weightUnit: values.weightUnit,
-    };
-    
-    setWorkouts([newWorkout, ...workouts]);
-    setOpen(false);
-    form.reset();
-    
-    toast({
-      title: "Workout logged",
-      description: "Your workout has been successfully recorded.",
-    });
+  const onSubmit = async (values: FormValues) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to save workouts.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const newWorkout = {
+        user_id: user.id,
+        date: new Date().toISOString(),
+        exercise: values.exercise,
+        sets: Number(values.sets),
+        reps: Number(values.reps),
+        weight: Number(values.weight),
+        weightUnit: values.weightUnit,
+      };
+      
+      const { data, error } = await supabase
+        .from('workouts')
+        .insert([newWorkout])
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        const savedWorkout = {
+          ...data[0],
+          id: data[0].id,
+          date: new Date(data[0].date)
+        };
+        
+        setWorkouts([savedWorkout, ...workouts]);
+        setOpen(false);
+        form.reset();
+        
+        toast({
+          title: "Workout logged",
+          description: "Your workout has been successfully recorded.",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save your workout.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteWorkout = (id: number) => {
-    setWorkouts(workouts.filter(workout => workout.id !== id));
-    toast({
-      title: "Workout deleted",
-      description: "Your workout entry has been removed.",
-    });
+  const deleteWorkout = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      setWorkouts(workouts.filter(workout => workout.id !== id));
+      toast({
+        title: "Workout deleted",
+        description: "Your workout entry has been removed.",
+      });
+    } catch (error) {
+      console.error('Error deleting workout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete workout.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -234,7 +310,11 @@ const WorkoutLog = () => {
       </header>
       
       <div className="p-4 pb-16">
-        {workouts.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <p>Loading your workouts...</p>
+          </div>
+        ) : workouts.length === 0 ? (
           <div className="text-center py-10">
             <p className="text-gray-400 mb-4">No workouts logged yet</p>
             <Button onClick={() => setOpen(true)} className="bg-blue-600 hover:bg-blue-700">
