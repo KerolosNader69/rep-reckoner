@@ -1,8 +1,10 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Dumbbell, Search, Pencil, MessageSquare, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+
 const Index = () => {
   const handleDemo = () => {
     toast({
@@ -10,6 +12,7 @@ const Index = () => {
       description: "Your ultimate fitness companion app"
     });
   };
+  
   return <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-900 to-black text-white">
       {/* Header */}
       <header className="px-4 py-6 flex justify-between items-center">
@@ -17,7 +20,7 @@ const Index = () => {
           <Dumbbell className="mr-2" /> RepReckoner
         </h1>
         <Link to="/login">
-          <Button variant="outline" className="flex items-center gap-2 border-white hover:bg-white/10 text-red-50">
+          <Button variant="outline" className="flex items-center gap-2 border-white hover:bg-white/10 text-white">
             <LogIn size={18} /> Sign In
           </Button>
         </Link>
@@ -89,4 +92,5 @@ const FeatureCard = ({
       </div>
     </Link>;
 };
+
 export default Index;

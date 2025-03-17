@@ -1,76 +1,175 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Calendar, Trash2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Plus, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "@/components/ui/use-toast";
-import { supabase, WorkoutEntry } from "@/lib/supabase";
-
-const formSchema = z.object({
-  exercise: z.string().min(1, { message: "Exercise name is required" }),
-  sets: z.coerce.number().min(1, { message: "At least 1 set is required" }),
-  reps: z.coerce.number().min(1, { message: "At least 1 rep is required" }),
-  weight: z.coerce.number().min(0, { message: "Weight must be 0 or greater" }),
-  weightUnit: z.enum(["kg", "lbs"]),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { WorkoutEntry, supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
 
 const WorkoutLog = () => {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [workouts, setWorkouts] = useState<WorkoutEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [workoutEntries, setWorkoutEntries] = useState<WorkoutEntry[]>([]);
+  const [isAddingWorkout, setIsAddingWorkout] = useState(false);
+  const [newWorkout, setNewWorkout] = useState<Omit<WorkoutEntry, 'id' | 'created_at'>>({
+    user_id: '',
+    date: new Date(),
+    exercise: '',
+    sets: 0,
+    reps: 0,
+    weight: 0,
+    weight_unit: 'kg',
+  });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  // Check if user is logged in
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/login');
+    const fetchWorkouts = async () => {
+      setIsLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          toast({
+            title: "Not authenticated",
+            description: "Please sign in to view your workout log.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const userId = user.id;
+        setNewWorkout(prev => ({ ...prev, user_id: userId }));
+
+        const { data, error } = await supabase
+          .from('workouts')
+          .select('*')
+          .eq('user_id', userId)
+          .order('date', { ascending: false });
+
+        if (error) {
+          console.error("Error fetching workouts:", error);
+          toast({
+            title: "Error fetching workouts",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (data) {
+          const parsedWorkouts = data.map(entry => ({
+            ...entry,
+            date: new Date(entry.date),
+          }));
+          setWorkoutEntries(parsedWorkouts as WorkoutEntry[]);
+        }
+      } catch (error) {
+        console.error("Unexpected error:", error);
+        toast({
+          title: "Unexpected error",
+          description: "Failed to load workout entries.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchWorkouts();
+  }, [toast]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewWorkout(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    setNewWorkout(prev => ({ ...prev, date: date || new Date() }));
+  };
+
+  const handleAddWorkout = async () => {
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast({
+          title: "Not authenticated",
+          description: "Please sign in to add a workout.",
+          variant: "destructive",
+        });
         return;
       }
-      
-      setUser(session.user);
-      fetchWorkouts(session.user.id);
-    };
-    
-    checkUser();
-  }, [navigate]);
 
-  const fetchWorkouts = async (userId: string) => {
-    try {
-      setIsLoading(true);
+      const userId = user.id;
+      const workoutToAdd = {
+        ...newWorkout,
+        user_id: userId,
+        date: newWorkout.date.toISOString(),
+        sets: Number(newWorkout.sets),
+        reps: Number(newWorkout.reps),
+        weight: Number(newWorkout.weight),
+      };
+
       const { data, error } = await supabase
         .from('workouts')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .insert([workoutToAdd])
+        .select();
 
       if (error) {
-        throw error;
+        console.error("Error adding workout:", error);
+        toast({
+          title: "Error adding workout",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
 
-      if (data) {
-        setWorkouts(data.map(workout => ({
-          ...workout,
-          date: new Date(workout.date)
-        })));
+      if (data && data.length > 0) {
+        const addedWorkout = data[0] as WorkoutEntry;
+        setWorkoutEntries(prev => [
+          { ...addedWorkout, date: new Date(addedWorkout.date) },
+          ...prev,
+        ]);
+        setNewWorkout({
+          user_id: userId,
+          date: new Date(),
+          exercise: '',
+          sets: 0,
+          reps: 0,
+          weight: 0,
+          weight_unit: 'kg',
+        });
+        setIsAddingWorkout(false);
+        toast({
+          title: "Workout added",
+          description: "Your workout has been successfully added.",
+        });
       }
     } catch (error) {
-      console.error('Error fetching workouts:', error);
+      console.error("Unexpected error:", error);
       toast({
-        title: "Error",
-        description: "Failed to load your workout data.",
+        title: "Unexpected error",
+        description: "Failed to add workout entry.",
         variant: "destructive",
       });
     } finally {
@@ -78,75 +177,8 @@ const WorkoutLog = () => {
     }
   };
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      exercise: "",
-      sets: 3,
-      reps: 10,
-      weight: 0,
-      weightUnit: "kg",
-    },
-  });
-
-  const onSubmit = async (values: FormValues) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to save workouts.",
-        variant: "destructive",
-      });
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const newWorkout = {
-        user_id: user.id,
-        date: new Date().toISOString(),
-        exercise: values.exercise,
-        sets: values.sets,
-        reps: values.reps,
-        weight: values.weight,
-        weight_unit: values.weightUnit,
-      };
-      
-      const { data, error } = await supabase
-        .from('workouts')
-        .insert([newWorkout])
-        .select();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        const savedWorkout = {
-          ...data[0],
-          id: data[0].id,
-          date: new Date(data[0].date)
-        };
-        
-        setWorkouts([savedWorkout, ...workouts]);
-        setOpen(false);
-        form.reset();
-        
-        toast({
-          title: "Workout logged",
-          description: "Your workout has been successfully recorded.",
-        });
-      }
-    } catch (error) {
-      console.error('Error saving workout:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save your workout.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const deleteWorkout = async (id: string) => {
+  const handleDeleteWorkout = async (id: string) => {
+    setIsLoading(true);
     try {
       const { error } = await supabase
         .from('workouts')
@@ -154,214 +186,188 @@ const WorkoutLog = () => {
         .eq('id', id);
 
       if (error) {
-        throw error;
+        console.error("Error deleting workout:", error);
+        toast({
+          title: "Error deleting workout",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
 
-      setWorkouts(workouts.filter(workout => workout.id !== id));
+      setWorkoutEntries(prev => prev.filter(entry => entry.id !== id));
       toast({
         title: "Workout deleted",
-        description: "Your workout entry has been removed.",
+        description: "Your workout has been successfully deleted.",
       });
     } catch (error) {
-      console.error('Error deleting workout:', error);
+      console.error("Unexpected error:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete workout.",
+        title: "Unexpected error",
+        description: "Failed to delete workout entry.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white pb-16">
-      <header className="p-4 flex items-center justify-between sticky top-0 bg-gray-900 z-10">
-        <div className="flex items-center gap-2">
-          <Link to="/" className="text-blue-400">
-            <ArrowLeft size={24} />
-          </Link>
-          <h1 className="text-xl font-bold">Workout Log</h1>
-        </div>
-        
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-              <Plus size={18} className="mr-1" /> Add
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-gray-800 text-white border-gray-700">
-            <DialogHeader>
-              <DialogTitle>Log New Workout</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="exercise"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Exercise</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Bench Press" className="bg-gray-700" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="sets"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Sets</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="1" 
-                            className="bg-gray-700" 
-                            {...field} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="reps"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Reps</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="1" 
-                            className="bg-gray-700" 
-                            {...field} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <div className="flex gap-4 items-end">
-                  <div className="flex-1">
-                    <FormField
-                      control={form.control}
-                      name="weight"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Weight</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              min="0" 
-                              step="0.5" 
-                              className="bg-gray-700" 
-                              {...field} 
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="w-20">
-                    <FormField
-                      control={form.control}
-                      name="weightUnit"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <RadioGroup 
-                              className="flex space-x-2" 
-                              value={field.value} 
-                              onValueChange={field.onChange}
-                            >
-                              <div className="flex items-center">
-                                <RadioGroupItem id="kg" value="kg" className="sr-only" />
-                                <FormLabel htmlFor="kg" className={`px-2 py-1 rounded ${field.value === 'kg' ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                                  kg
-                                </FormLabel>
-                              </div>
-                              <div className="flex items-center">
-                                <RadioGroupItem id="lbs" value="lbs" className="sr-only" />
-                                <FormLabel htmlFor="lbs" className={`px-2 py-1 rounded ${field.value === 'lbs' ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                                  lbs
-                                </FormLabel>
-                              </div>
-                            </RadioGroup>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                  Save Workout
-                </Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      <header className="p-4 flex items-center gap-2 sticky top-0 bg-gray-900 z-10">
+        <Link to="/" className="text-blue-400">
+          <ArrowLeft size={24} />
+        </Link>
+        <h1 className="text-xl font-bold">Workout Log</h1>
       </header>
-      
-      <div className="p-4 pb-16">
-        {isLoading ? (
-          <div className="flex justify-center py-10">
-            <p>Loading your workouts...</p>
-          </div>
-        ) : workouts.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-gray-400 mb-4">No workouts logged yet</p>
-            <Button onClick={() => setOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-              Log Your First Workout
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {workouts.map((workout) => (
-              <Card key={workout.id} className="bg-gray-800 border-gray-700">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium">{workout.exercise}</h3>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => deleteWorkout(workout.id)}
-                        className="text-gray-400 hover:text-red-400 h-8 w-8 p-0"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-gray-400 text-sm flex items-center mb-2">
-                    <Calendar size={14} className="mr-1" /> 
-                    {workout.date.toLocaleDateString()}
-                  </p>
-                  <div className="bg-gray-700 p-2 rounded-md grid grid-cols-3 gap-2 text-center">
-                    <div>
-                      <p className="text-xs text-gray-400">Sets</p>
-                      <p className="font-medium">{workout.sets}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-400">Reps</p>
-                      <p className="font-medium">{workout.reps}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-400">Weight</p>
-                      <p className="font-medium">{workout.weight} {workout.weightUnit}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+
+      <main className="flex-1 p-4">
+        <div className="mb-4">
+          <Button onClick={() => setIsAddingWorkout(true)} className="bg-green-600 hover:bg-green-700">
+            <Plus size={18} className="mr-2" /> Add Workout
+          </Button>
+        </div>
+
+        {isAddingWorkout && (
+          <div className="bg-gray-800 rounded-lg p-4 mb-4">
+            <h2 className="text-xl font-semibold mb-4">Add New Workout</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="date">Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      {selectedDate ? (
+                        format(selectedDate, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={handleDateSelect}
+                      disabled={(date) =>
+                        date > new Date()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label htmlFor="exercise">Exercise</Label>
+                <Input
+                  type="text"
+                  id="exercise"
+                  name="exercise"
+                  value={newWorkout.exercise}
+                  onChange={handleInputChange}
+                  className="bg-gray-700 border-gray-600"
+                />
+              </div>
+              <div>
+                <Label htmlFor="sets">Sets</Label>
+                <Input
+                  type="number"
+                  id="sets"
+                  name="sets"
+                  value={newWorkout.sets}
+                  onChange={handleInputChange}
+                  className="bg-gray-700 border-gray-600"
+                />
+              </div>
+              <div>
+                <Label htmlFor="reps">Reps</Label>
+                <Input
+                  type="number"
+                  id="reps"
+                  name="reps"
+                  value={newWorkout.reps}
+                  onChange={handleInputChange}
+                  className="bg-gray-700 border-gray-600"
+                />
+              </div>
+              <div>
+                <Label htmlFor="weight">Weight</Label>
+                <Input
+                  type="number"
+                  id="weight"
+                  name="weight"
+                  value={newWorkout.weight}
+                  onChange={handleInputChange}
+                  className="bg-gray-700 border-gray-600"
+                />
+              </div>
+              <div>
+                <Label htmlFor="weight_unit">Weight Unit</Label>
+                <Select onValueChange={(value) => handleInputChange({ target: { name: 'weight_unit', value } } as any)}>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Select unit" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 text-white">
+                    <SelectItem value="kg">kg</SelectItem>
+                    <SelectItem value="lbs">lbs</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsAddingWorkout(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddWorkout} className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                {isLoading ? "Adding..." : "Add"}
+              </Button>
+            </div>
           </div>
         )}
-      </div>
+
+        <div className="rounded-md border">
+          <ScrollArea>
+            <Table>
+              <TableCaption>Your recent workouts.</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[150px]">Date</TableHead>
+                  <TableHead>Exercise</TableHead>
+                  <TableHead>Sets</TableHead>
+                  <TableHead>Reps</TableHead>
+                  <TableHead>Weight</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {workoutEntries.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="font-medium">{format(entry.date, "PPP")}</TableCell>
+                    <TableCell>{entry.exercise}</TableCell>
+                    <TableCell>{entry.sets}</TableCell>
+                    <TableCell>{entry.reps}</TableCell>
+                    <TableCell>{entry.weight} {entry.weight_unit}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon">
+                        <Edit className="mr-2 h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteWorkout(entry.id)}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </div>
+      </main>
     </div>
   );
 };
