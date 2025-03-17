@@ -20,8 +20,8 @@ const Index = () => {
           <Dumbbell className="mr-2" /> RepReckoner
         </h1>
         <Link to="/login">
-          <Button variant="outline" className="flex items-center gap-2 border-white hover:bg-white/10 text-white">
-            <LogIn size={18} /> <span className="text-white font-medium">Sign In</span>
+          <Button variant="outline" className="flex items-center gap-2 border-white hover:bg-white/10">
+            <LogIn size={18} /> <span className="text-black font-medium">Sign In</span>
           </Button>
         </Link>
       </header>
