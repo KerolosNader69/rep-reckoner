@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { WorkoutEntry, supabase } from "@/lib/supabase";
+import { WorkoutEntry, supabase, formatDateForSupabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 
 const WorkoutLog = () => {
@@ -126,7 +126,7 @@ const WorkoutLog = () => {
       const workoutToAdd = {
         ...newWorkout,
         user_id: userId,
-        date: newWorkout.date.toISOString(),
+        date: formatDateForSupabase(newWorkout.date),
         sets: Number(newWorkout.sets),
         reps: Number(newWorkout.reps),
         weight: Number(newWorkout.weight),
