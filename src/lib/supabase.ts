@@ -10,7 +10,7 @@ export const supabase = supabaseClient;
 export type WorkoutEntry = {
   id: string;
   user_id: string;
-  date: Date;
+  date: string | Date; // Allow both string and Date to handle the conversion
   exercise: string;
   sets: number;
   reps: number;

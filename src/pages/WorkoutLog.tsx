@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Edit, Trash2 } from "lucide-react";
@@ -74,11 +75,13 @@ const WorkoutLog = () => {
         }
 
         if (data) {
+          // Parse dates before setting the state
           const parsedWorkouts = data.map(entry => ({
             ...entry,
             date: new Date(entry.date),
-          }));
-          setWorkoutEntries(parsedWorkouts as WorkoutEntry[]);
+          })) as WorkoutEntry[];
+          
+          setWorkoutEntries(parsedWorkouts);
         }
       } catch (error) {
         console.error("Unexpected error:", error);
@@ -145,11 +148,13 @@ const WorkoutLog = () => {
       }
 
       if (data && data.length > 0) {
-        const addedWorkout = data[0] as WorkoutEntry;
-        setWorkoutEntries(prev => [
-          { ...addedWorkout, date: new Date(addedWorkout.date) },
-          ...prev,
-        ]);
+        // Convert string date to Date object before adding to state
+        const addedWorkout = {
+          ...data[0],
+          date: new Date(data[0].date)
+        } as WorkoutEntry;
+        
+        setWorkoutEntries(prev => [addedWorkout, ...prev]);
         setNewWorkout({
           user_id: userId,
           date: new Date(),
