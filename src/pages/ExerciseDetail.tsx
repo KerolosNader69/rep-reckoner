@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 
-// Demo exercise data (would be fetched from an API in a real app)
+// Demo exercise data (expanded with more exercises)
 const exercisesData = [
   {
     id: 1,
@@ -104,6 +104,305 @@ const exercisesData = [
       "Don't arch your back excessively.",
       "Keep your wrists straight and elbows tucked.",
       "Breathe out as you press up."
+    ]
+  },
+  {
+    id: 6,
+    name: "Bent Over Rows",
+    muscle: "Back",
+    difficulty: "Intermediate",
+    videoId: "FWJR5Ve8UR8",
+    instructions: [
+      "Hold a barbell with an overhand grip, hands just outside shoulder width.",
+      "Bend at the hips and knees, keeping your back straight.",
+      "Pull the barbell to your lower ribcage.",
+      "Lower the barbell with control.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Keep your back flat and core engaged throughout the movement.",
+      "Pull your elbows back, not up.",
+      "Keep the barbell close to your body.",
+      "Maintain a slight bend in your knees."
+    ]
+  },
+  {
+    id: 7,
+    name: "Dumbbell Lunges",
+    muscle: "Legs",
+    difficulty: "Beginner",
+    videoId: "D7KaRcUTQeE",
+    instructions: [
+      "Stand with feet hip-width apart, holding dumbbells at your sides.",
+      "Step forward with one leg and lower your body until both knees are bent at 90-degree angles.",
+      "Push through the heel of your front foot to return to the starting position.",
+      "Repeat with the other leg."
+    ],
+    tips: [
+      "Keep your upper body straight and shoulders back.",
+      "Don't let your front knee extend past your toes.",
+      "Keep your weight evenly distributed.",
+      "Look straight ahead, not down."
+    ]
+  },
+  {
+    id: 8,
+    name: "Incline Bench Press",
+    muscle: "Chest",
+    difficulty: "Intermediate",
+    videoId: "SrqOu55lrYU",
+    instructions: [
+      "Lie on an incline bench set to 15-30 degrees.",
+      "Grip the barbell slightly wider than shoulder-width apart.",
+      "Lower the bar to your upper chest.",
+      "Press the bar back up to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Keep your feet flat on the floor.",
+      "Maintain full contact between your back and the bench.",
+      "Lower the weight under control.",
+      "Focus on using your upper chest muscles."
+    ]
+  },
+  {
+    id: 9,
+    name: "Leg Press",
+    muscle: "Legs",
+    difficulty: "Beginner",
+    videoId: "IZxyjW7MPJQ",
+    instructions: [
+      "Sit on the leg press machine with your back flat against the seat.",
+      "Place your feet shoulder-width apart on the platform.",
+      "Release the safety handles and lower the platform by bending your knees.",
+      "Push through your heels to extend your legs without locking your knees.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Don't lock your knees at the top of the movement.",
+      "Keep your back against the seat at all times.",
+      "Don't let your knees collapse inward.",
+      "Use a controlled motion throughout the exercise."
+    ]
+  },
+  {
+    id: 10,
+    name: "Lateral Raises",
+    muscle: "Shoulders",
+    difficulty: "Beginner",
+    videoId: "3VcKaXpzqRo",
+    instructions: [
+      "Stand with feet shoulder-width apart, holding dumbbells at your sides.",
+      "Keep a slight bend in your elbows.",
+      "Raise the dumbbells out to the sides until they reach shoulder height.",
+      "Lower the dumbbells with control.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Don't swing the weights or use momentum.",
+      "Keep your wrists in a neutral position.",
+      "Don't raise the dumbbells above shoulder height.",
+      "Maintain good posture throughout the exercise."
+    ]
+  },
+  {
+    id: 11,
+    name: "Tricep Pushdowns",
+    muscle: "Arms",
+    difficulty: "Beginner",
+    videoId: "2-LAMcpzODU",
+    instructions: [
+      "Stand facing a cable machine with a rope attachment at about chest height.",
+      "Grab the rope with both hands, palms facing each other.",
+      "Keep your elbows close to your body and push the rope down until your arms are fully extended.",
+      "Slowly allow the rope to rise back up, keeping tension on your triceps.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Keep your elbows fixed at your sides.",
+      "Only move your forearms during the exercise.",
+      "Don't lean forward too much.",
+      "Squeeze your triceps at the bottom of the movement."
+    ]
+  },
+  {
+    id: 12,
+    name: "Bicep Curls",
+    muscle: "Arms",
+    difficulty: "Beginner",
+    videoId: "ykJmrZ5v0Oo",
+    instructions: [
+      "Stand with feet shoulder-width apart, holding dumbbells at your sides with palms facing forward.",
+      "Keep your elbows close to your sides.",
+      "Curl the weights up toward your shoulders.",
+      "Lower the weights with control.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Don't swing your body to lift the weights.",
+      "Keep your wrists straight throughout the movement.",
+      "Focus on full range of motion.",
+      "Keep your upper arms stationary."
+    ]
+  },
+  {
+    id: 13,
+    name: "Romanian Deadlift",
+    muscle: "Legs",
+    difficulty: "Intermediate",
+    videoId: "JCXUYuzwNrM",
+    instructions: [
+      "Stand with feet hip-width apart, holding a barbell in front of your thighs.",
+      "Keep your back straight and knees slightly bent.",
+      "Hinge at the hips and lower the barbell down your legs.",
+      "Lower until you feel a stretch in your hamstrings, typically just below the knees.",
+      "Return to the starting position by driving your hips forward."
+    ],
+    tips: [
+      "Keep the bar close to your legs throughout the movement.",
+      "Maintain a neutral spine position.",
+      "Focus on the hip hinge, not a squat movement.",
+      "Feel the stretch in your hamstrings at the bottom of the movement."
+    ]
+  },
+  {
+    id: 14,
+    name: "Dumbbell Flyes",
+    muscle: "Chest",
+    difficulty: "Intermediate",
+    videoId: "eozdVDA78K0",
+    instructions: [
+      "Lie on a flat bench with a dumbbell in each hand above your chest.",
+      "Lower the dumbbells out to the sides in a wide arc.",
+      "Keep a slight bend in your elbows throughout the movement.",
+      "Return to the starting position, squeezing your chest muscles.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Don't lower the weights too far and strain your shoulders.",
+      "Keep the movement slow and controlled.",
+      "Focus on stretching and contracting your chest muscles.",
+      "Keep your feet flat on the floor and back against the bench."
+    ]
+  },
+  {
+    id: 15,
+    name: "Face Pulls",
+    muscle: "Shoulders",
+    difficulty: "Intermediate",
+    videoId: "V8dZ3pyiCBo",
+    instructions: [
+      "Set a cable pulley to slightly above head height with a rope attachment.",
+      "Grab the rope with both hands, palms facing each other.",
+      "Step back until your arms are fully extended.",
+      "Pull the rope toward your face, separating the ends as you pull.",
+      "Return to the starting position with control."
+    ],
+    tips: [
+      "Keep your elbows high during the movement.",
+      "Pull the rope toward your face, not your chest.",
+      "Squeeze your shoulder blades together at the end of the pull.",
+      "Use a light weight to master proper form."
+    ]
+  },
+  {
+    id: 16,
+    name: "Calf Raises",
+    muscle: "Legs",
+    difficulty: "Beginner",
+    videoId: "gwLzBJYoWlI",
+    instructions: [
+      "Stand on a raised surface like a step or calf raise machine.",
+      "Place the balls of your feet on the edge with heels hanging off.",
+      "Lower your heels toward the floor.",
+      "Raise your heels as high as possible by pushing through the balls of your feet.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Hold onto something for balance if needed.",
+      "Perform the exercise slowly for maximum benefit.",
+      "Don't bounce at the bottom of the movement.",
+      "For added resistance, hold dumbbells or use a calf raise machine."
+    ]
+  },
+  {
+    id: 17,
+    name: "Chest Dips",
+    muscle: "Chest",
+    difficulty: "Intermediate",
+    videoId: "dX_nSOOJIsE",
+    instructions: [
+      "Grip the parallel bars with palms facing inward.",
+      "Lean your torso forward slightly to target the chest muscles.",
+      "Lower your body by bending your elbows until you feel a stretch in your chest.",
+      "Push back up to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Keep a slight forward lean to target the chest more than the triceps.",
+      "Don't lower yourself too far to avoid shoulder strain.",
+      "Keep your core engaged throughout the movement.",
+      "For beginners, use an assisted dip machine."
+    ]
+  },
+  {
+    id: 18,
+    name: "Hammer Curls",
+    muscle: "Arms",
+    difficulty: "Beginner",
+    videoId: "zC3nLlEvin4",
+    instructions: [
+      "Stand with feet shoulder-width apart, holding dumbbells at your sides with palms facing your body.",
+      "Keep your elbows close to your sides.",
+      "Curl the weights up toward your shoulders while keeping your palms facing each other.",
+      "Lower the weights with control.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Keep your upper arms stationary throughout the exercise.",
+      "Don't swing the weights or use momentum.",
+      "Focus on the brachialis and brachioradialis muscles (side of the arm).",
+      "Keep your wrists straight throughout the movement."
+    ]
+  },
+  {
+    id: 19,
+    name: "Barbell Hip Thrusts",
+    muscle: "Glutes",
+    difficulty: "Intermediate",
+    videoId: "Zp26q4BY5HE",
+    instructions: [
+      "Sit on the ground with your upper back against a bench, knees bent, and feet flat on the floor.",
+      "Place a padded barbell across your hips.",
+      "Drive through your heels to lift your hips toward the ceiling.",
+      "Squeeze your glutes at the top of the movement.",
+      "Lower your hips with control and repeat."
+    ],
+    tips: [
+      "Keep your chin tucked and maintain a neutral spine.",
+      "Drive through your heels, not your toes.",
+      "Use a pad or towel on the barbell for comfort.",
+      "Focus on using your glutes, not your lower back."
+    ]
+  },
+  {
+    id: 20,
+    name: "Cable Crossovers",
+    muscle: "Chest",
+    difficulty: "Intermediate",
+    videoId: "taI4XduLpTk",
+    instructions: [
+      "Stand between two cable machines with the pulleys set high.",
+      "Grab the handles with each hand and step forward slightly.",
+      "With a slight bend in your elbows, bring your hands together in front of you in an arcing motion.",
+      "Slowly return to the starting position, feeling the stretch in your chest.",
+      "Repeat for the desired number of repetitions."
+    ],
+    tips: [
+      "Keep a slight bend in your elbows throughout the movement.",
+      "Focus on squeezing your chest muscles as you bring your hands together.",
+      "Don't let the weights pull your arms back too far and strain your shoulders.",
+      "Maintain good posture throughout the exercise."
     ]
   }
 ];
