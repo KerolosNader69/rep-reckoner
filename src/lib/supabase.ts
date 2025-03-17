@@ -19,6 +19,14 @@ export type WorkoutEntry = {
   created_at?: string;
 };
 
+// Helper function to ensure dates are properly formatted for API calls
+export const formatDateForSupabase = (date: Date | string): string => {
+  if (typeof date === 'string') {
+    return date;
+  }
+  return date.toISOString();
+};
+
 export type UserProfile = {
   id: string;
   username: string | null;
