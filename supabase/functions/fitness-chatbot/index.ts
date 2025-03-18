@@ -29,7 +29,7 @@ serve(async (req) => {
           error: "OpenAI API key is not configured on the server. Please configure it in the Supabase Edge Function secrets.",
           message: {
             role: 'assistant',
-            content: "I'm currently unavailable due to a configuration issue. Please try again later when the API key has been configured."
+            content: "I'm currently unavailable due to a configuration issue. The OpenAI API key has not been set. Please contact the administrator."
           }
         }),
         {
