@@ -47,7 +47,7 @@ const Index = () => {
       <header className="p-6 flex justify-between items-center backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <Dumbbell className="text-blue-400 h-8 w-8" />
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">FitTrack</h1>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">Rep Reckoner</h1>
         </div>
         <div className="flex gap-3">
           {user ? (
@@ -148,7 +148,7 @@ const Index = () => {
       </main>
       
       <footer className="p-6 text-center text-gray-500 mt-10">
-        <p>© {new Date().getFullYear()} FitTrack. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Rep Reckoner. All rights reserved.</p>
       </footer>
     </div>
   );
