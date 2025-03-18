@@ -11,7 +11,6 @@ import SignUp from "./pages/SignUp";
 import Exercises from "./pages/Exercises";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import WorkoutLog from "./pages/WorkoutLog";
-import AiCoach from "./pages/AiCoach";
 import FitnessChat from "./pages/FitnessChat";
 
 const queryClient = new QueryClient();
@@ -29,7 +28,6 @@ const App = () => (
           <Route path="/exercises" element={<Exercises />} />
           <Route path="/exercise/:id" element={<ExerciseDetail />} />
           <Route path="/workout-log" element={<WorkoutLog />} />
-          <Route path="/ai-coach" element={<AiCoach />} />
           <Route path="/fitness-chat" element={<FitnessChat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

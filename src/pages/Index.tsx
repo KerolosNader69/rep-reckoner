@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
-import { Dumbbell, CalendarDays, Bot, MessageSquare } from "lucide-react";
+import { Dumbbell, CalendarDays, MessageSquare } from "lucide-react";
 
 const Index = () => {
   const [user, setUser] = useState(null);
@@ -40,31 +41,51 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <header className="p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">FitTrack</h1>
-        <div className="flex gap-2">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white overflow-x-hidden">
+      <div className="absolute top-0 left-0 right-0 h-64 bg-blue-600/10 blur-3xl -z-10 rounded-full transform translate-y-[-50%] scale-150"></div>
+      
+      <header className="p-6 flex justify-between items-center backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <Dumbbell className="text-blue-400 h-8 w-8" />
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">FitTrack</h1>
+        </div>
+        <div className="flex gap-3">
           {user ? (
-            <Button variant="ghost" onClick={handleSignOut}>
+            <Button 
+              variant="ghost" 
+              onClick={handleSignOut}
+              className="border border-gray-700 hover:bg-gray-800 hover:text-blue-400 transition-all"
+            >
               Sign Out
             </Button>
           ) : (
             <Link to="/login">
-              <Button variant="ghost">Sign In</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20">
+                Sign In
+              </Button>
             </Link>
           )}
         </div>
       </header>
       
-      <main className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
-          <Card className="bg-gray-800 border-gray-700 hover:border-blue-500 transition-colors">
+      <main className="p-6 py-10">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400">
+            Your Ultimate Fitness Companion
+          </h2>
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Track your progress, explore exercises, and get expert advice to achieve your fitness goals.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/70 hover:border-blue-500/70 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/10 group">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 group-hover:text-blue-400 transition-colors">
                 <Dumbbell className="text-blue-400" />
                 Exercises
               </CardTitle>
-              <CardDescription>Browse exercise library</CardDescription>
+              <CardDescription className="text-gray-400">Browse exercise library</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-gray-300">
@@ -73,18 +94,20 @@ const Index = () => {
             </CardContent>
             <CardFooter>
               <Link to="/exercises" className="w-full">
-                <Button className="w-full">View Exercises</Button>
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-900/20">
+                  View Exercises
+                </Button>
               </Link>
             </CardFooter>
           </Card>
           
-          <Card className="bg-gray-800 border-gray-700 hover:border-blue-500 transition-colors">
+          <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/70 hover:border-blue-500/70 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/10 group">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 group-hover:text-blue-400 transition-colors">
                 <CalendarDays className="text-blue-400" />
                 Workout Log
               </CardTitle>
-              <CardDescription>Track your workouts</CardDescription>
+              <CardDescription className="text-gray-400">Track your workouts</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-gray-300">
@@ -93,38 +116,20 @@ const Index = () => {
             </CardContent>
             <CardFooter>
               <Link to="/workout-log" className="w-full">
-                <Button className="w-full">Open Workout Log</Button>
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-900/20">
+                  Open Workout Log
+                </Button>
               </Link>
             </CardFooter>
           </Card>
           
-          <Card className="bg-gray-800 border-gray-700 hover:border-blue-500 transition-colors">
+          <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/70 hover:border-blue-500/70 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/10 group">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="text-blue-400" />
-                AI Coach
-              </CardTitle>
-              <CardDescription>Get personalized plans</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300">
-                Receive AI-generated workout plans tailored to your fitness level and goals.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link to="/ai-coach" className="w-full">
-                <Button className="w-full">Get Recommendations</Button>
-              </Link>
-            </CardFooter>
-          </Card>
-          
-          <Card className="bg-gray-800 border-gray-700 hover:border-blue-500 transition-colors">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 group-hover:text-blue-400 transition-colors">
                 <MessageSquare className="text-blue-400" />
                 Fitness Chat
               </CardTitle>
-              <CardDescription>Ask anatomy & fitness questions</CardDescription>
+              <CardDescription className="text-gray-400">Ask anatomy & fitness questions</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-gray-300">
@@ -133,13 +138,18 @@ const Index = () => {
             </CardContent>
             <CardFooter>
               <Link to="/fitness-chat" className="w-full">
-                <Button className="w-full">Open Chat</Button>
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg shadow-blue-900/20">
+                  Open Chat
+                </Button>
               </Link>
             </CardFooter>
           </Card>
-          
         </div>
       </main>
+      
+      <footer className="p-6 text-center text-gray-500 mt-10">
+        <p>© {new Date().getFullYear()} FitTrack. All rights reserved.</p>
+      </footer>
     </div>
   );
 };

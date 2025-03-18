@@ -21,8 +21,22 @@ serve(async (req) => {
   }
 
   try {
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY is not set in environment variables');
+    if (!openAIApiKey || openAIApiKey.length === 0) {
+      console.error('OPENAI_API_KEY is not properly set in environment variables');
+      // Return a more helpful error message with instructions
+      return new Response(
+        JSON.stringify({ 
+          error: "OpenAI API key is not configured on the server. Please configure it in the Supabase Edge Function secrets.",
+          message: {
+            role: 'assistant',
+            content: "I'm currently unavailable due to a configuration issue. Please try again later when the API key has been configured."
+          }
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200, // Return 200 to avoid breaking the app
+        }
+      );
     }
 
     const { messages } = await req.json() as { messages: ChatMessage[] };
@@ -58,7 +72,18 @@ serve(async (req) => {
     if (!response.ok) {
       const error = await response.json();
       console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+      return new Response(
+        JSON.stringify({ 
+          message: {
+            role: 'assistant',
+            content: "I'm having trouble connecting to my knowledge base. Please try again in a moment."
+          }
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200, // Return 200 to prevent app from breaking
+        }
+      );
     }
 
     const data = await response.json();
@@ -74,10 +99,15 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in fitness-chatbot function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        message: {
+          role: 'assistant',
+          content: "I encountered an error processing your request. Please try again later."
+        }
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 200, // Return 200 to prevent app from breaking
       }
     );
   }
