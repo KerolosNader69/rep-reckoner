@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Send, Info } from "lucide-react";
+import { ArrowLeft, Send, Info, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +23,7 @@ const FitnessChat = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [configError, setConfigError] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -48,6 +49,45 @@ const FitnessChat = () => {
     inputRef.current?.focus();
   }, []);
 
+  // Function to test the connection to OpenAI API
+  const testConnection = async () => {
+    setIsLoading(true);
+    setApiError(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("fitness-chatbot", {
+        body: {
+          messages: [{ role: "user", content: "test" }],
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.error && data.error.includes("OpenAI API key")) {
+        setConfigError(true);
+        throw new Error("API key configuration error");
+      } else {
+        setConfigError(false);
+        toast({
+          title: "Connection Successful",
+          description: "The fitness assistant is ready to use!",
+        });
+      }
+    } catch (error) {
+      console.error("Connection test error:", error);
+      setApiError("Couldn't connect to the assistant service. Please try again later.");
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect to the fitness assistant.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -61,6 +101,7 @@ const FitnessChat = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setApiError(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("fitness-chatbot", {
@@ -76,15 +117,7 @@ const FitnessChat = () => {
         throw new Error(error.message);
       }
 
-      if (data?.message) {
-        const assistantMessage: Message = {
-          id: `assistant-${Date.now()}`,
-          role: "assistant",
-          content: data.message.content,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } else if (data?.error && data.error.includes("OpenAI API key")) {
+      if (data?.error && data.error.includes("OpenAI API key")) {
         setConfigError(true);
         toast({
           title: "Server Configuration Error",
@@ -99,6 +132,14 @@ const FitnessChat = () => {
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
+      } else if (data?.message) {
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          content: data.message.content,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -111,6 +152,7 @@ const FitnessChat = () => {
       };
       setMessages((prev) => [...prev, errorMessage]);
       
+      setApiError("Failed to connect to the assistant service. Please try again later.");
       toast({
         title: "Error",
         description: "Failed to get a response. Please try again.",
@@ -137,7 +179,20 @@ const FitnessChat = () => {
         </Link>
         <h1 className="text-xl font-bold">Fitness & Anatomy Chat</h1>
         <div className="flex-1"></div>
-        <div className="text-blue-400 animate-pulse">AI</div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={testConnection} 
+          disabled={isLoading}
+          className="text-blue-400 border-blue-500 hover:bg-blue-950"
+        >
+          {isLoading ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+          ) : (
+            <RefreshCw size={16} className="mr-1" />
+          )}
+          Test Connection
+        </Button>
       </header>
 
       <main className="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full">
@@ -147,6 +202,13 @@ const FitnessChat = () => {
             <AlertDescription>
               The chatbot is not properly configured. Please contact the administrator to set up the OpenAI API key.
             </AlertDescription>
+          </Alert>
+        )}
+
+        {apiError && (
+          <Alert className="mb-4 bg-red-900/30 border-red-800 text-red-100">
+            <Info className="h-4 w-4 text-red-400" />
+            <AlertDescription>{apiError}</AlertDescription>
           </Alert>
         )}
 

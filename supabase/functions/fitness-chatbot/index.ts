@@ -21,15 +21,15 @@ serve(async (req) => {
   }
 
   try {
+    // Validate API key at runtime to ensure it's actually available and valid
     if (!openAIApiKey || openAIApiKey.length === 0) {
-      console.error('OPENAI_API_KEY is not properly set in environment variables');
-      // Return a more helpful error message with instructions
+      console.error('OpenAI API key is missing or empty');
       return new Response(
         JSON.stringify({ 
-          error: "OpenAI API key is not configured on the server. Please configure it in the Supabase Edge Function secrets.",
+          error: "OpenAI API key is not configured correctly",
           message: {
             role: 'assistant',
-            content: "I'm currently unavailable due to a configuration issue. The OpenAI API key has not been set. Please contact the administrator."
+            content: "Sorry, I'm currently unavailable due to a server configuration issue. Please try again later."
           }
         }),
         {
@@ -54,8 +54,9 @@ serve(async (req) => {
     }
 
     console.log(`Processing chat request with ${messages.length} messages`);
+    console.log('Using OpenAI API key:', openAIApiKey ? 'Key is present (not showing for security)' : 'Key is missing');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
@@ -69,14 +70,24 @@ serve(async (req) => {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('OpenAI API error:', error);
+    if (!openAIResponse.ok) {
+      const errorData = await openAIResponse.json();
+      console.error('OpenAI API error:', JSON.stringify(errorData));
+      
+      // Handle different API error types
+      let errorMessage = "I'm having trouble connecting to my knowledge base. Please try again in a moment.";
+      
+      if (errorData.error && errorData.error.type === 'invalid_request_error') {
+        errorMessage = "There was an issue with your request. This could be due to a configuration problem.";
+      } else if (errorData.error && errorData.error.type === 'authentication_error') {
+        errorMessage = "I'm currently unavailable due to an authentication issue. The server needs reconfiguration.";
+      }
+      
       return new Response(
         JSON.stringify({ 
           message: {
             role: 'assistant',
-            content: "I'm having trouble connecting to my knowledge base. Please try again in a moment."
+            content: errorMessage
           }
         }),
         {
@@ -86,8 +97,8 @@ serve(async (req) => {
       );
     }
 
-    const data = await response.json();
-    console.log('OpenAI API response received');
+    const data = await openAIResponse.json();
+    console.log('OpenAI API response received successfully');
 
     return new Response(
       JSON.stringify({ message: data.choices[0].message }),
