@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   id: string;
@@ -26,6 +27,7 @@ const FitnessChat = () => {
   const [apiError, setApiError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
   
   // Initial welcome message
   useEffect(() => {
@@ -46,8 +48,10 @@ const FitnessChat = () => {
 
   // Auto focus on input when page loads
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (!isMobile) {
+      inputRef.current?.focus();
+    }
+  }, [isMobile]);
 
   // Function to test the connection to the Edge Function
   const testConnection = async () => {
@@ -224,39 +228,41 @@ const FitnessChat = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col">
-      <header className="p-4 flex items-center gap-2 sticky top-0 bg-gray-900/80 backdrop-blur-md z-10 border-b border-gray-800/70">
+      <header className="p-3 flex items-center gap-2 sticky top-0 bg-gray-900/80 backdrop-blur-md z-10 border-b border-gray-800/70">
         <Link to="/" className="text-blue-400 hover:text-blue-300 transition-colors">
-          <ArrowLeft size={24} />
+          <ArrowLeft size={isMobile ? 20 : 24} />
         </Link>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Dumbbell className="h-5 w-5 text-emerald-400" />
+        <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold flex items-center gap-2`}>
+          <Dumbbell className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
           Fitness & Anatomy Chat
         </h1>
         <div className="flex-1"></div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={testConnection} 
-          disabled={isLoading}
-          className="text-blue-400 border-blue-500 hover:bg-blue-950"
-        >
-          {isLoading ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-          ) : (
-            <RefreshCw size={16} className="mr-1" />
-          )}
-          Test Connection
-        </Button>
+        {!isMobile && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={testConnection} 
+            disabled={isLoading}
+            className="text-blue-400 border-blue-500 hover:bg-blue-950"
+          >
+            {isLoading ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+            ) : (
+              <RefreshCw size={16} className="mr-1" />
+            )}
+            Test Connection
+          </Button>
+        )}
       </header>
 
-      <main className="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full">
+      <main className={`flex-1 flex flex-col ${isMobile ? 'p-2' : 'p-4'} max-w-3xl mx-auto w-full`}>
         {apiError && (
           <Alert className="mb-4 bg-red-900/30 border-red-800 text-red-100">
             <AlertDescription>{apiError}</AlertDescription>
           </Alert>
         )}
 
-        <ScrollArea className="flex-1 pr-4 pb-4">
+        <ScrollArea className={`flex-1 ${isMobile ? 'pr-2' : 'pr-4'} pb-4`}>
           <div className="space-y-4 pb-4">
             {messages.map((message) => (
               <div key={message.id}>
@@ -267,13 +273,13 @@ const FitnessChat = () => {
           </div>
         </ScrollArea>
 
-        <div className="mt-4 flex gap-2 items-center">
+        <div className={`${isMobile ? 'mt-2' : 'mt-4'} flex gap-2 items-center`}>
           <Input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about workout techniques, anatomy, or exercises..."
+            placeholder={isMobile ? "Ask about fitness..." : "Ask about workout techniques, anatomy, or exercises..."}
             className="flex-1 bg-gray-800/50 backdrop-blur-sm border-gray-700/50 focus-visible:ring-blue-500 text-white"
             disabled={isLoading}
           />
@@ -281,11 +287,12 @@ const FitnessChat = () => {
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-900/30"
+            size={isMobile ? "sm" : "default"}
           >
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
-              <Send size={18} />
+              <Send size={isMobile ? 16 : 18} />
             )}
           </Button>
         </div>
