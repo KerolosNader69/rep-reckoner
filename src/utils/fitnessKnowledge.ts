@@ -1,4 +1,7 @@
 
+// This file can be used by both the edge function and frontend components
+// if you want to share knowledge between them
+
 // Basic fitness and anatomy knowledge base
 export interface KnowledgeEntry {
   keywords: string[];
