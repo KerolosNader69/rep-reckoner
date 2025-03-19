@@ -196,7 +196,10 @@ const FitnessChat = () => {
               {message.role === "user" ? "U" : "AI"}
             </AvatarFallback>
             {message.role === "assistant" && (
-              <AvatarImage src="/placeholder.svg" />
+              <AvatarImage src="/lovable-uploads/4917af78-800a-4915-92eb-8b7b549ea36b.png" alt="Fitness Bot" />
+            )}
+            {message.role === "user" && (
+              <AvatarImage src="/lovable-uploads/30fb3a54-d028-446a-99f6-c45998fad47c.png" alt="User" />
             )}
           </Avatar>
           <div
