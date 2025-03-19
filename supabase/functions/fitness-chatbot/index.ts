@@ -2,8 +2,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -21,87 +19,61 @@ serve(async (req) => {
   }
 
   try {
-    // Validate API key at runtime to ensure it's actually available and valid
-    if (!openAIApiKey || openAIApiKey.length === 0) {
-      console.error('OpenAI API key is missing or empty');
-      return new Response(
-        JSON.stringify({ 
-          error: "OpenAI API key is not configured correctly",
-          message: {
-            role: 'assistant',
-            content: "Sorry, I'm currently unavailable due to a server configuration issue. Please try again later."
-          }
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200, // Return 200 to avoid breaking the app
-        }
-      );
-    }
-
     const { messages } = await req.json() as { messages: ChatMessage[] };
-    
-    // Insert system message if it's not already present
-    if (messages.length === 0 || messages[0].role !== 'system') {
-      messages.unshift({
-        role: 'system',
-        content: `You are a knowledgeable fitness and anatomy assistant. 
-        Provide accurate, scientifically-backed information about exercise, muscle anatomy, training techniques, and fitness principles.
-        Explain complex concepts in simple terms and offer practical workout advice based on scientific evidence.
-        Avoid providing medical diagnosis or treatment recommendations.
-        If you're unsure about something, admit it rather than providing potentially incorrect information.`
-      });
+
+    // Get the last user message
+    const lastUserMessage = messages
+      .filter(msg => msg.role === 'user')
+      .pop();
+
+    if (!lastUserMessage) {
+      throw new Error("No user message found");
     }
 
-    console.log(`Processing chat request with ${messages.length} messages`);
-    console.log('Using OpenAI API key:', openAIApiKey ? 'Key is present (not showing for security)' : 'Key is missing');
+    console.log(`Processing local fitness chatbot request: "${lastUserMessage.content}"`);
 
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages,
-        temperature: 0.7,
-        max_tokens: 800,
-      }),
-    });
+    // Simple pattern matching response system
+    let responseContent = "";
 
-    if (!openAIResponse.ok) {
-      const errorData = await openAIResponse.json();
-      console.error('OpenAI API error:', JSON.stringify(errorData));
-      
-      // Handle different API error types
-      let errorMessage = "I'm having trouble connecting to my knowledge base. Please try again in a moment.";
-      
-      if (errorData.error && errorData.error.type === 'invalid_request_error') {
-        errorMessage = "There was an issue with your request. This could be due to a configuration problem.";
-      } else if (errorData.error && errorData.error.type === 'authentication_error') {
-        errorMessage = "I'm currently unavailable due to an authentication issue. The server needs reconfiguration.";
-      }
-      
-      return new Response(
-        JSON.stringify({ 
-          message: {
-            role: 'assistant',
-            content: errorMessage
-          }
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200, // Return 200 to prevent app from breaking
-        }
-      );
+    // Very basic keyword matching
+    const query = lastUserMessage.content.toLowerCase();
+
+    // Simple response matching based on keywords
+    if (query.includes("muscle") || query.includes("anatomy")) {
+      responseContent = "The human body has over 600 muscles. The major muscle groups include the chest (pectorals), back (latissimus dorsi), shoulders (deltoids), arms (biceps, triceps), legs (quadriceps, hamstrings), and core (abdominals).";
+    } 
+    else if (query.includes("workout") || query.includes("exercise") || query.includes("training")) {
+      responseContent = "A well-rounded fitness routine includes strength training, cardiovascular exercise, and flexibility work. For beginners, I recommend 2-3 full-body strength workouts per week plus 150 minutes of moderate cardio. Remember to warm up before and cool down after each session!";
+    }
+    else if (query.includes("cardio") || query.includes("running") || query.includes("aerobic")) {
+      responseContent = "Cardiovascular exercise strengthens your heart and improves endurance. Aim for 150-300 minutes of moderate-intensity cardio per week. Good options include running, swimming, cycling, and brisk walking. Start slowly and gradually increase duration and intensity.";
+    }
+    else if (query.includes("nutrition") || query.includes("diet") || query.includes("food") || query.includes("eat")) {
+      responseContent = "Nutrition is crucial for fitness success. Focus on whole foods like lean proteins, complex carbohydrates, and healthy fats. For active individuals, protein intake should be around 1.6-2.2g per kg of bodyweight. Stay hydrated by drinking at least 2-3 liters of water daily.";
+    }
+    else if (query.includes("weight loss") || query.includes("fat loss") || query.includes("lose weight")) {
+      responseContent = "Weight loss requires a caloric deficit—consuming fewer calories than you burn. A sustainable approach combines moderate calorie reduction (about 500 calories below maintenance), regular strength training to preserve muscle, and increased physical activity. Aim for 0.5-1% of body weight loss per week.";
+    }
+    else if (query.includes("hello") || query.includes("hi") || query.includes("hey")) {
+      responseContent = "Hello! I'm your fitness and anatomy assistant. How can I help you today?";
+    }
+    else if (query.includes("thanks") || query.includes("thank you")) {
+      responseContent = "You're welcome! Consistency is key to fitness success. Keep up the good work!";
+    }
+    else {
+      responseContent = "I can provide information about muscle anatomy, workout techniques, nutrition, and general fitness principles. What specific topic are you interested in?";
     }
 
-    const data = await openAIResponse.json();
-    console.log('OpenAI API response received successfully');
+    // Log the response
+    console.log(`Local fitness chatbot response: "${responseContent}"`);
 
     return new Response(
-      JSON.stringify({ message: data.choices[0].message }),
+      JSON.stringify({ 
+        message: {
+          role: 'assistant',
+          content: responseContent
+        }
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -113,7 +85,7 @@ serve(async (req) => {
       JSON.stringify({ 
         message: {
           role: 'assistant',
-          content: "I encountered an error processing your request. Please try again later."
+          content: "I encountered an error processing your request. Please try again."
         }
       }),
       {

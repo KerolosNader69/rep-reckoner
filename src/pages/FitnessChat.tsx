@@ -1,13 +1,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Send, Info, RefreshCw } from "lucide-react";
+import { ArrowLeft, Send, Dumbbell, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
 
 interface Message {
@@ -22,7 +23,6 @@ const FitnessChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [configError, setConfigError] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,7 +49,7 @@ const FitnessChat = () => {
     inputRef.current?.focus();
   }, []);
 
-  // Function to test the connection to OpenAI API
+  // Function to test the connection to the Edge Function
   const testConnection = async () => {
     setIsLoading(true);
     setApiError(null);
@@ -57,7 +57,7 @@ const FitnessChat = () => {
     try {
       const { data, error } = await supabase.functions.invoke("fitness-chatbot", {
         body: {
-          messages: [{ role: "user", content: "test" }],
+          messages: [{ role: "user", content: "hello" }],
         },
       });
 
@@ -65,16 +65,10 @@ const FitnessChat = () => {
         throw new Error(error.message);
       }
 
-      if (data?.error && data.error.includes("OpenAI API key")) {
-        setConfigError(true);
-        throw new Error("API key configuration error");
-      } else {
-        setConfigError(false);
-        toast({
-          title: "Connection Successful",
-          description: "The fitness assistant is ready to use!",
-        });
-      }
+      toast({
+        title: "Connection Successful",
+        description: "The fitness assistant is ready to use!",
+      });
     } catch (error) {
       console.error("Connection test error:", error);
       setApiError("Couldn't connect to the assistant service. Please try again later.");
@@ -103,36 +97,35 @@ const FitnessChat = () => {
     setIsLoading(true);
     setApiError(null);
 
+    // Add typing indicator
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: "typing-indicator",
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+      },
+    ]);
+
     try {
       const { data, error } = await supabase.functions.invoke("fitness-chatbot", {
         body: {
           messages: [
-            ...messages.filter(m => m.id !== "welcome").map(m => ({ role: m.role, content: m.content })),
+            ...messages.filter(m => m.id !== "welcome" && m.id !== "typing-indicator").map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: input.trim() },
           ],
         },
       });
 
+      // Remove typing indicator
+      setMessages((prev) => prev.filter(m => m.id !== "typing-indicator"));
+
       if (error) {
         throw new Error(error.message);
       }
 
-      if (data?.error && data.error.includes("OpenAI API key")) {
-        setConfigError(true);
-        toast({
-          title: "Server Configuration Error",
-          description: "The chatbot is not properly configured. Please contact the administrator.",
-          variant: "destructive",
-        });
-        
-        const errorMessage: Message = {
-          id: `assistant-error-${Date.now()}`,
-          role: "assistant",
-          content: "I'm currently unavailable due to a configuration issue. Please try again later when the server has been properly set up.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      } else if (data?.message) {
+      if (data?.message) {
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
           role: "assistant",
@@ -143,6 +136,9 @@ const FitnessChat = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      
+      // Remove typing indicator
+      setMessages((prev) => prev.filter(m => m.id !== "typing-indicator"));
       
       const errorMessage: Message = {
         id: `assistant-error-${Date.now()}`,
@@ -171,13 +167,68 @@ const FitnessChat = () => {
     }
   };
 
+  // Render loading skeleton for typing indicator
+  const renderMessage = (message: Message) => {
+    if (message.id === "typing-indicator") {
+      return (
+        <div className="flex gap-2 items-end">
+          <Skeleton className="h-4 w-12 bg-gray-700" />
+          <Skeleton className="h-3 w-24 bg-gray-700" />
+          <Skeleton className="h-4 w-16 bg-gray-700" />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={message.id}
+        className={`flex ${
+          message.role === "user" ? "justify-end" : "justify-start"
+        }`}
+      >
+        <div
+          className={`flex gap-3 max-w-[85%] ${
+            message.role === "user" ? "flex-row-reverse" : ""
+          }`}
+        >
+          <Avatar className={message.role === "user" ? "bg-blue-600" : "bg-emerald-700"}>
+            <AvatarFallback>
+              {message.role === "user" ? "U" : "AI"}
+            </AvatarFallback>
+            {message.role === "assistant" && (
+              <AvatarImage src="/placeholder.svg" />
+            )}
+          </Avatar>
+          <div
+            className={`p-3 rounded-lg ${
+              message.role === "user"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 text-white"
+            }`}
+          >
+            <p className="whitespace-pre-wrap">{message.content}</p>
+            <p className="text-xs opacity-70 mt-1">
+              {message.timestamp.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col">
       <header className="p-4 flex items-center gap-2 sticky top-0 bg-gray-900/80 backdrop-blur-md z-10 border-b border-gray-800/70">
         <Link to="/" className="text-blue-400 hover:text-blue-300 transition-colors">
           <ArrowLeft size={24} />
         </Link>
-        <h1 className="text-xl font-bold">Fitness & Anatomy Chat</h1>
+        <h1 className="text-xl font-bold flex items-center gap-2">
+          <Dumbbell className="h-5 w-5 text-emerald-400" />
+          Fitness & Anatomy Chat
+        </h1>
         <div className="flex-1"></div>
         <Button 
           variant="outline" 
@@ -196,18 +247,8 @@ const FitnessChat = () => {
       </header>
 
       <main className="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full">
-        {configError && (
-          <Alert className="mb-4 bg-amber-900/30 border-amber-800 text-amber-100">
-            <Info className="h-4 w-4 text-amber-400" />
-            <AlertDescription>
-              The chatbot is not properly configured. Please contact the administrator to set up the OpenAI API key.
-            </AlertDescription>
-          </Alert>
-        )}
-
         {apiError && (
           <Alert className="mb-4 bg-red-900/30 border-red-800 text-red-100">
-            <Info className="h-4 w-4 text-red-400" />
             <AlertDescription>{apiError}</AlertDescription>
           </Alert>
         )}
@@ -215,41 +256,8 @@ const FitnessChat = () => {
         <ScrollArea className="flex-1 pr-4 pb-4">
           <div className="space-y-4 pb-4">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`flex gap-3 max-w-[85%] ${
-                    message.role === "user" ? "flex-row-reverse" : ""
-                  }`}
-                >
-                  <Avatar className={message.role === "user" ? "bg-blue-600" : "bg-emerald-700"}>
-                    <AvatarFallback>
-                      {message.role === "user" ? "U" : "AI"}
-                    </AvatarFallback>
-                    {message.role === "assistant" && (
-                      <AvatarImage src="/placeholder.svg" />
-                    )}
-                  </Avatar>
-                  <div
-                    className={`p-3 rounded-lg ${
-                      message.role === "user"
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 text-white"
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
+              <div key={message.id}>
+                {renderMessage(message)}
               </div>
             ))}
             <div ref={messagesEndRef} />
