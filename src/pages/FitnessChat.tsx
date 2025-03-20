@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { findResponse } from "@/utils/fitnessKnowledge";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -24,6 +25,7 @@ const FitnessChat = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [usingOnlineAI, setUsingOnlineAI] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
@@ -34,7 +36,7 @@ const FitnessChat = () => {
       {
         id: "welcome",
         role: "assistant",
-        content: "Hello! I'm your fitness and anatomy assistant. Ask me anything about workouts, muscle groups, exercise techniques, nutrition, or fitness coaching!",
+        content: "Hello! I'm your AI fitness and anatomy coach. Ask me anything about workouts, muscle groups, exercise techniques, nutrition, or fitness coaching!",
         timestamp: new Date(),
       },
     ]);
@@ -52,30 +54,56 @@ const FitnessChat = () => {
     }
   }, [isMobile]);
 
-  // Function to test the local knowledge base
+  // Function to test AI connection
   const testConnection = async () => {
     setIsLoading(true);
     setApiError(null);
     
     try {
-      const response = findResponse("hello");
-      
-      if (!response) {
-        throw new Error("Failed to get a response");
+      const { data, error } = await supabase.functions.invoke('fitness-ai-chat', {
+        body: {
+          messages: [{ role: 'user', content: 'Hello, are you working?' }]
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
       }
 
+      if (!data || !data.message) {
+        throw new Error('No response from AI service');
+      }
+
+      setUsingOnlineAI(true);
       toast({
         title: "Connection Successful",
-        description: "The fitness assistant is ready to use!",
+        description: "The online AI fitness coach is ready to use!",
       });
     } catch (error) {
-      console.error("Connection test error:", error);
-      setApiError("Couldn't connect to the assistant service. Please try again later.");
-      toast({
-        title: "Connection Error",
-        description: "Failed to connect to the fitness assistant.",
-        variant: "destructive",
-      });
+      console.error("Online AI connection test error:", error);
+      
+      // Fallback to local knowledge base
+      try {
+        const response = findResponse("hello");
+        
+        if (!response) {
+          throw new Error("Failed to get a response from local knowledge base");
+        }
+        
+        setUsingOnlineAI(false);
+        toast({
+          title: "Using Local Knowledge Base",
+          description: "Online AI unavailable. Using built-in knowledge instead.",
+        });
+      } catch (localError) {
+        console.error("Local knowledge base error:", localError);
+        setApiError("Couldn't connect to any fitness assistant service. Please try again later.");
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect to the fitness assistant.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -108,11 +136,42 @@ const FitnessChat = () => {
     ]);
 
     try {
-      // Short delay to simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 500));
+      let responseContent;
       
-      // Get response from local knowledge base
-      const responseContent = findResponse(input.trim());
+      // Try online AI first if previously successful
+      if (usingOnlineAI) {
+        try {
+          const chatMessages = messages
+            .filter(m => m.id !== "typing-indicator" && m.id !== "welcome")
+            .map(m => ({ role: m.role, content: m.content }));
+          
+          // Add the new user message
+          chatMessages.push({ role: "user", content: input.trim() });
+          
+          // Keep only the last 10 messages to avoid token limits
+          const recentMessages = chatMessages.slice(-10);
+          
+          const { data, error } = await supabase.functions.invoke('fitness-ai-chat', {
+            body: { messages: recentMessages }
+          });
+
+          if (error) throw error;
+          responseContent = data.message.content;
+        } catch (error) {
+          console.error("Online AI error:", error);
+          // If online AI fails, fall back to local knowledge base
+          responseContent = findResponse(input.trim());
+          setUsingOnlineAI(false);
+          toast({
+            title: "Fallback to Local Knowledge",
+            description: "Online AI unavailable. Using built-in knowledge.",
+            duration: 3000,
+          });
+        }
+      } else {
+        // Use local knowledge base
+        responseContent = findResponse(input.trim());
+      }
 
       // Remove typing indicator
       setMessages((prev) => prev.filter(m => m.id !== "typing-indicator"));
@@ -157,6 +216,18 @@ const FitnessChat = () => {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  // Toggle between online AI and local knowledge base
+  const toggleAIMode = () => {
+    setUsingOnlineAI(prev => !prev);
+    toast({
+      title: usingOnlineAI ? "Using Local Knowledge Base" : "Using Online AI",
+      description: usingOnlineAI 
+        ? "Switched to built-in knowledge. Responses may be more limited." 
+        : "Switched to online AI. Responses will be more comprehensive.",
+      duration: 3000,
+    });
   };
 
   // Render loading skeleton for typing indicator
@@ -225,21 +296,32 @@ const FitnessChat = () => {
           AI Fitness Coach
         </h1>
         <div className="flex-1"></div>
+        
         {!isMobile && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={testConnection} 
-            disabled={isLoading}
-            className="text-blue-400 border-blue-500 hover:bg-blue-950"
-          >
-            {isLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-            ) : (
-              <RefreshCw size={16} className="mr-1" />
-            )}
-            Test AI
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline" 
+              size="sm"
+              onClick={toggleAIMode}
+              className={`${usingOnlineAI ? 'text-green-400 border-green-500' : 'text-amber-400 border-amber-500'} hover:bg-gray-800`}
+            >
+              {usingOnlineAI ? 'Using Online AI' : 'Using Local Knowledge'}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={testConnection} 
+              disabled={isLoading}
+              className="text-blue-400 border-blue-500 hover:bg-blue-950"
+            >
+              {isLoading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+              ) : (
+                <RefreshCw size={16} className="mr-1" />
+              )}
+              Test AI Connection
+            </Button>
+          </div>
         )}
       </header>
 
