@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -89,11 +88,37 @@ const fitnessKnowledge = {
     "Periodization (strategic training cycles) helps optimize recovery. Include deload weeks (reduced volume/intensity) every 4-8 weeks, vary intensity throughout training cycles, and plan both short-term (daily/weekly) and long-term (monthly/yearly) recovery periods. Listen to your body and adjust training accordingly."
   ],
   
+  // New fitness coaching category
+  coaching: [
+    "Fitness coaching provides personalized guidance to help you reach your goals more efficiently. A good coach assesses your current fitness level, creates customized programs, corrects your technique, and adjusts your plan as needed. When choosing a coach, look for proper certifications (NSCA, ACE, NASM, ISSA), experience with your specific goals, and a style that matches your personality.",
+    "Working with a coach offers several benefits: expert program design tailored to your specific needs, form correction to maximize results and prevent injuries, accountability to keep you consistent, and motivation during challenging periods. Coaches can be especially valuable for beginners, those with specific goals like competition prep, individuals with medical conditions, and anyone struggling with motivation.",
+    "Personal training typically costs $50-150 per session depending on experience and location, while online coaching ranges from $100-300 monthly. Many coaches offer packages with discounted rates. The investment often pays off through faster progress, fewer injuries, and more sustainable results. Before committing, look for a coach who offers a consultation to ensure their approach aligns with your needs and communication style."
+  ],
+  
+  // Workout splits information
+  pushDay: [
+    "A push day focuses on muscles used in pushing movements: chest, shoulders, and triceps. A well-structured push workout typically includes compound chest movements (bench press variations), compound shoulder exercises (overhead press), isolation movements for shoulders (lateral raises), and tricep exercises (extensions, pushdowns). Start with heavier compound lifts when you're fresh, then move to isolation exercises.",
+    "For an effective push day, consider this structure: begin with a horizontal push (bench press variation) for chest, follow with a vertical push (overhead press variation) for shoulders, then add isolation work for any lagging areas with exercises like cable flyes, lateral raises, and tricep extensions. Typical volume might include 12-16 sets for chest, 8-12 sets for shoulders, and 6-10 sets for triceps.",
+    "Common push day mistakes include neglecting shoulder health (incorporate face pulls or band pull-aparts), overemphasizing certain areas (like chest) while neglecting others (like rear deltoids), and failing to use a variety of angles and equipment. Remember that chest, shoulder and tricep development requires working these muscles from multiple angles and with various types of tension."
+  ],
+  
+  pullDay: [
+    "A pull day targets muscles used in pulling movements: back, rear deltoids, and biceps. An effective pull workout typically includes vertical pulling for lats (pull-ups, lat pulldowns), horizontal pulling for mid-back (row variations), rear deltoid work (face pulls, reverse flyes), and bicep exercises (curls with various grips). Start with compound movements, then progress to isolated exercises.",
+    "For an effective pull day structure: begin with a lat-focused movement (pull-ups or pulldowns), follow with a row variation targeting the mid/upper back, add specific rear deltoid work, and finish with direct bicep training. For back development, focus on feeling the target muscles working rather than just moving weight. Typical volume includes 12-16 sets for back, 4-6 sets for rear deltoids, and 6-10 sets for biceps.",
+    "To maximize your pull workout, focus on initiating movements with your back muscles rather than your arms, experiment with different grip positions and widths to target different areas of the back, and ensure you're fully retracting your scapulae at the peak of rowing movements. Many lifters benefit from higher rep ranges (10-15) for back to develop the mind-muscle connection necessary for proper activation."
+  ],
+  
+  legDay: [
+    "A comprehensive leg day targets all lower body muscles: quadriceps, hamstrings, glutes, and calves. An effective workout structure includes compound movements (squats, leg press, lunges, deadlift variations), quad-focused exercises, hamstring/glute work, and calf exercises. Start with the most demanding compound movements, then move to more isolated exercises.",
+    "For an optimal leg session: begin with a squat variation or leg press for overall lower body development, follow with a hip hinge movement like Romanian deadlifts for posterior chain, add isolation work for quadriceps (leg extensions) and hamstrings (leg curls), include specific glute exercises like hip thrusts, and finish with both standing (gastrocnemius) and seated (soleus) calf work.",
+    "Common leg training mistakes include neglecting full range of motion on squats and leg press, avoiding challenging weights due to discomfort, neglecting posterior chain development, and treating calf training as an afterthought. For balanced development, ensure you're training with equal emphasis on both quadriceps and hamstrings/glutes, as posterior chain weaknesses are common and can lead to injuries."
+  ],
+  
   // Fallback for unmatched queries
   default: [
-    "I can provide information about muscle anatomy, workout techniques, nutrition, and general fitness principles. What specific topic are you interested in learning more about?",
-    "I'm here to help with fitness and anatomy questions. Would you like to know about specific muscle groups, training approaches, nutrition strategies, or something else?",
-    "I can assist with various fitness topics including workout programming, exercise technique, muscle development, nutrition, and recovery strategies. What would you like to explore?"
+    "I can provide information about muscle anatomy, workout techniques, nutrition, coaching, and general fitness principles. What specific topic are you interested in learning more about?",
+    "I'm here to help with fitness and anatomy questions. Would you like to know about specific muscle groups, training approaches, nutrition strategies, coaching advice, or something else?",
+    "I can assist with various fitness topics including workout programming, exercise technique, muscle development, nutrition, coaching, and recovery strategies. What would you like to explore?"
   ]
 };
 
@@ -157,6 +182,18 @@ serve(async (req) => {
     }
     else if (/\b(recovery|rest|sleep|overtraining|deload|recuperation|soreness|doms)\b/.test(query)) {
       responseCategory = 'recovery';
+    }
+    else if (/\b(coaching|coach|personal trainer|trainer|fitness coach)\b/.test(query)) {
+      responseCategory = 'coaching';
+    }
+    else if (/\b(push day|push workout|chest workout|chest day|shoulder workout|tricep)\b/.test(query)) {
+      responseCategory = 'pushDay';
+    }
+    else if (/\b(pull day|pull workout|back workout|back day|bicep workout)\b/.test(query)) {
+      responseCategory = 'pullDay';
+    }
+    else if (/\b(leg day|leg workout|lower body|lower body day)\b/.test(query)) {
+      responseCategory = 'legDay';
     }
     
     // Get responses for the category and pick a random one

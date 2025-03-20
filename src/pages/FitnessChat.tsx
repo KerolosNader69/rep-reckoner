@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Send, Dumbbell, RefreshCw } from "lucide-react";
@@ -35,7 +34,7 @@ const FitnessChat = () => {
       {
         id: "welcome",
         role: "assistant",
-        content: "Hello! I'm your fitness and anatomy assistant. Ask me anything about workouts, muscle groups, exercise techniques, or anatomy!",
+        content: "Hello! I'm your fitness and anatomy assistant. Ask me anything about workouts, muscle groups, exercise techniques, nutrition, or fitness coaching!",
         timestamp: new Date(),
       },
     ]);
@@ -223,7 +222,7 @@ const FitnessChat = () => {
         </Link>
         <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold flex items-center gap-2`}>
           <Dumbbell className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
-          AI Fitness Assistant
+          AI Fitness Coach
         </h1>
         <div className="flex-1"></div>
         {!isMobile && (
@@ -268,7 +267,7 @@ const FitnessChat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isMobile ? "Ask about fitness..." : "Ask about workout techniques, anatomy, or exercises..."}
+            placeholder={isMobile ? "Ask about fitness..." : "Ask about workout techniques, coaching, or fitness advice..."}
             className="flex-1 bg-gray-800/50 backdrop-blur-sm border-gray-700/50 focus-visible:ring-blue-500 text-white"
             disabled={isLoading}
           />

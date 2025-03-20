@@ -1,4 +1,3 @@
-
 // This file can be used by both the edge function and frontend components
 // if you want to share knowledge between them
 
@@ -130,6 +129,30 @@ export const fitnessKnowledge: KnowledgeEntry[] = [
     response: "Proper exercise technique is crucial for both results and injury prevention. Key principles include: maintaining neutral spine alignment during load-bearing exercises, creating tension in the target muscles before initiating movement, controlling the eccentric (lowering) portion of exercises, breathing appropriately (typically exhale during exertion), and using appropriate ranges of motion for your individual structure. Start with lighter weights to master form before progressing. Consider occasional video recording to assess your technique, or work with a qualified coach for feedback. Remember that proper form with moderate weight is more effective and safer than poor form with heavy weight."
   },
   {
+    keywords: ["coaching", "coach", "personal trainer", "trainer", "fitness coach"],
+    response: "Fitness coaching provides personalized guidance, accountability, and expertise to help you reach your goals more efficiently. A good coach assesses your current fitness level, creates customized programs based on your goals and limitations, provides technique correction, and adjusts your plan as needed. Personal trainers typically charge $50-150 per session depending on experience and location, while online coaching ranges from $100-300 monthly. When choosing a coach, look for proper certifications (NSCA, ACE, NASM, ISSA), experience with your specific goals, and a coaching style that matches your personality. A coach can be especially valuable for beginners, those with specific goals like competition prep, individuals with injuries or medical conditions, and anyone struggling with consistency or motivation."
+  },
+  {
+    keywords: ["push day", "push workout", "chest workout", "shoulder workout", "tricep workout"],
+    response: "A push day focuses on muscles used in pushing movements: chest, shoulders, and triceps. A well-structured push workout typically includes: 1) Compound chest movements (bench press variations, push-ups), 2) Compound shoulder exercises (overhead press, landmine press), 3) Isolation movements for shoulders (lateral raises, front raises), 4) Tricep exercises (extensions, pushdowns, dips). Start with heavier compound lifts when you're fresh, then move to isolation exercises. For optimal muscle development, incorporate a variety of angles and equipment. Typical volume might include 12-16 sets for chest, 8-12 sets for shoulders, and 6-10 sets for triceps, spread across 4-6 exercises. Rest 1-3 minutes between sets depending on the exercise intensity. Remember that proper form is crucial for both results and injury prevention."
+  },
+  {
+    keywords: ["pull day", "pull workout", "back workout", "bicep workout"],
+    response: "A pull day targets muscles used in pulling movements: back, rear deltoids, and biceps. An effective pull workout typically includes: 1) Vertical pulling for lats (pull-ups, lat pulldowns), 2) Horizontal pulling for mid-back (rows variations), 3) Rear deltoid work (face pulls, reverse flyes), 4) Bicep exercises (curls with various grips). Start with compound movements that allow heavier loads, then progress to more isolated exercises. For back development, focus on feeling the target muscles working rather than just moving weight. Typical volume includes 12-16 sets for back, 4-6 sets for rear deltoids, and 6-10 sets for biceps, using 4-6 exercises total. Allow 1-3 minutes rest between sets based on exercise intensity. Remember to initiate pulls with your back muscles rather than your arms for maximum effectiveness."
+  },
+  {
+    keywords: ["leg day", "leg workout", "lower body"],
+    response: "A comprehensive leg day targets all lower body muscles: quadriceps, hamstrings, glutes, and calves. An effective workout structure includes: 1) Compound movements (squats, leg press, lunges, deadlift variations), 2) Quad-focused exercises (leg extensions, sissy squats), 3) Hamstring/glute work (leg curls, hip thrusts, good mornings), 4) Calf exercises (standing and seated raises). Start with the most demanding compound movements, then move to more isolated exercises. Typical volume includes 10-14 sets for quads, 8-12 sets for hamstrings/glutes, and 6-8 sets for calves, using 5-7 exercises total. Rest periods of 2-3 minutes for heavy compound movements and 1-2 minutes for isolation exercises are recommended. Don't underestimate proper warm-up for leg training to prevent injuries and enhance performance. For balanced development, ensure you're not neglecting posterior chain (hamstrings/glutes) training."
+  },
+  {
+    keywords: ["program design", "workout plan", "training plan", "routine design"],
+    response: "Effective workout program design considers several key factors: 1) Your goals (strength, hypertrophy, endurance, weight loss), 2) Training frequency (how many sessions per week), 3) Exercise selection (compound vs. isolation, movement patterns), 4) Volume and intensity management (sets, reps, weight), 5) Progression schemes (how to advance over time), and 6) Recovery management. For beginners, full-body routines 3x weekly or upper/lower splits 4x weekly are ideal for building consistency and technique. Intermediate lifters benefit from PPL (Push/Pull/Legs) or body part splits allowing higher volume per muscle group. Advanced trainees might use specialized approaches like Conjugate Method, DUP (Daily Undulating Periodization), or block periodization. Regardless of level, program design should incorporate progressive overload, appropriate exercise variation, and scheduled deload periods. The most effective program is one that you'll follow consistently while providing sufficient stimulus for adaptation."
+  },
+  {
+    keywords: ["technique", "correct form", "proper form", "exercise form"],
+    response: "Proper exercise technique is crucial for both results and injury prevention. Key principles include: 1) Maintaining neutral spine alignment during load-bearing exercises, 2) Establishing proper bracing and stability before movement, 3) Following joint-friendly movement patterns, 4) Controlling the eccentric (lowering) portion of exercises, 5) Using appropriate ranges of motion for your individual structure, and 6) Breathing properly (typically exhale during exertion). Common form mistakes include: excessive spinal flexion during deadlifts, allowing knees to cave during squats, flaring elbows during bench press, using momentum instead of controlled movement, and improper neck positioning. When learning new exercises, start with lighter weights to master form before progressing. Consider filming yourself occasionally to assess technique, or work with a qualified coach for feedback. Remember that proper form with moderate weight is more effective and safer than poor form with heavy weight."
+  },
+  {
     keywords: ["thanks", "thank you", "appreciate"],
     response: "You're welcome! Consistency is key to fitness success. Keep up the good work, and let me know if you have any other questions as you progress on your fitness journey. Every workout brings you one step closer to your goals!"
   }
@@ -138,7 +161,7 @@ export const fitnessKnowledge: KnowledgeEntry[] = [
 // Function to find the best matching response
 export function findResponse(query: string): string {
   if (!query || query.trim().length === 0) {
-    return "I didn't catch that. Could you please ask me about fitness, workouts, muscle anatomy, or nutrition?";
+    return "I didn't catch that. Could you please ask me about fitness, workouts, muscle anatomy, nutrition, or coaching?";
   }
 
   const normalizedQuery = query.toLowerCase();
@@ -160,5 +183,5 @@ export function findResponse(query: string): string {
   }
 
   // Return default response if no matches found
-  return "I don't have specific information about that yet, but I can help with questions about muscle anatomy, workout techniques, nutrition, recovery, or general fitness principles. What would you like to know?";
+  return "I don't have specific information about that yet, but I can help with questions about muscle anatomy, workout techniques, nutrition, recovery, coaching, or general fitness principles. What would you like to know?";
 }
