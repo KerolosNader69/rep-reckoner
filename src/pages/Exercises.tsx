@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowLeft, Filter } from "lucide-react";
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
-// Demo exercise data with additional exercises
+// Demo exercise data with many more exercises
 const exercisesData = [
   {
     id: 1,
@@ -169,6 +168,166 @@ const exercisesData = [
     difficulty: "Intermediate",
     videoId: "taI4XduLpTk",
     thumbnail: "https://i.ytimg.com/vi/taI4XduLpTk/hqdefault.jpg",
+  },
+  {
+    id: 21,
+    name: "Mountain Climbers",
+    muscle: "Core",
+    difficulty: "Beginner",
+    videoId: "nmwgirgXLYM",
+    thumbnail: "https://i.ytimg.com/vi/nmwgirgXLYM/hqdefault.jpg",
+  },
+  {
+    id: 22,
+    name: "Kettlebell Swings",
+    muscle: "Full Body",
+    difficulty: "Intermediate",
+    videoId: "YSxHifyI6s8",
+    thumbnail: "https://i.ytimg.com/vi/YSxHifyI6s8/hqdefault.jpg",
+  },
+  {
+    id: 23,
+    name: "Dips",
+    muscle: "Arms",
+    difficulty: "Intermediate",
+    videoId: "2z8JmcrW-As",
+    thumbnail: "https://i.ytimg.com/vi/2z8JmcrW-As/hqdefault.jpg",
+  },
+  {
+    id: 24,
+    name: "Front Squats",
+    muscle: "Legs",
+    difficulty: "Intermediate",
+    videoId: "uEPLXQzyK1o",
+    thumbnail: "https://i.ytimg.com/vi/uEPLXQzyK1o/hqdefault.jpg",
+  },
+  {
+    id: 25,
+    name: "Good Mornings",
+    muscle: "Back",
+    difficulty: "Intermediate",
+    videoId: "YA-h3n9L4YU",
+    thumbnail: "https://i.ytimg.com/vi/YA-h3n9L4YU/hqdefault.jpg",
+  },
+  {
+    id: 26,
+    name: "Hang Cleans",
+    muscle: "Full Body",
+    difficulty: "Advanced",
+    videoId: "WCdhjt5G9C4",
+    thumbnail: "https://i.ytimg.com/vi/WCdhjt5G9C4/hqdefault.jpg",
+  },
+  {
+    id: 27,
+    name: "Bulgarian Split Squats",
+    muscle: "Legs",
+    difficulty: "Intermediate",
+    videoId: "2C-uNgKwPLE",
+    thumbnail: "https://i.ytimg.com/vi/2C-uNgKwPLE/hqdefault.jpg",
+  },
+  {
+    id: 28,
+    name: "Inverted Rows",
+    muscle: "Back",
+    difficulty: "Beginner",
+    videoId: "SyIBPOvNhto",
+    thumbnail: "https://i.ytimg.com/vi/SyIBPOvNhto/hqdefault.jpg",
+  },
+  {
+    id: 29,
+    name: "Push Press",
+    muscle: "Shoulders",
+    difficulty: "Intermediate",
+    videoId: "iaBVSJm78ko",
+    thumbnail: "https://i.ytimg.com/vi/iaBVSJm78ko/hqdefault.jpg",
+  },
+  {
+    id: 30,
+    name: "Box Jumps",
+    muscle: "Legs",
+    difficulty: "Intermediate",
+    videoId: "52r_Ul5k03g",
+    thumbnail: "https://i.ytimg.com/vi/52r_Ul5k03g/hqdefault.jpg",
+  },
+  {
+    id: 31,
+    name: "Russian Twists",
+    muscle: "Core",
+    difficulty: "Beginner",
+    videoId: "wkD8rjkodUI",
+    thumbnail: "https://i.ytimg.com/vi/wkD8rjkodUI/hqdefault.jpg",
+  },
+  {
+    id: 32,
+    name: "Cable Lat Pulldowns",
+    muscle: "Back",
+    difficulty: "Beginner",
+    videoId: "OcFCHdQHjVU",
+    thumbnail: "https://i.ytimg.com/vi/OcFCHdQHjVU/hqdefault.jpg",
+  },
+  {
+    id: 33,
+    name: "Reverse Lunges",
+    muscle: "Legs",
+    difficulty: "Beginner",
+    videoId: "rHZACn1Gixs",
+    thumbnail: "https://i.ytimg.com/vi/rHZACn1Gixs/hqdefault.jpg",
+  },
+  {
+    id: 34,
+    name: "Side Planks",
+    muscle: "Core",
+    difficulty: "Beginner",
+    videoId: "XeN4pEZZJNI",
+    thumbnail: "https://i.ytimg.com/vi/XeN4pEZZJNI/hqdefault.jpg",
+  },
+  {
+    id: 35,
+    name: "Clean and Jerk",
+    muscle: "Full Body",
+    difficulty: "Advanced",
+    videoId: "yN48sZ3FzlI",
+    thumbnail: "https://i.ytimg.com/vi/yN48sZ3FzlI/hqdefault.jpg",
+  },
+  {
+    id: 36,
+    name: "Seated Cable Rows",
+    muscle: "Back",
+    difficulty: "Beginner",
+    videoId: "sP_4vybjVJs",
+    thumbnail: "https://i.ytimg.com/vi/sP_4vybjVJs/hqdefault.jpg",
+  },
+  {
+    id: 37,
+    name: "Jump Rope",
+    muscle: "Cardio",
+    difficulty: "Beginner",
+    videoId: "FJmRQ5iTXKE",
+    thumbnail: "https://i.ytimg.com/vi/FJmRQ5iTXKE/hqdefault.jpg",
+  },
+  {
+    id: 38,
+    name: "Burpees",
+    muscle: "Full Body",
+    difficulty: "Intermediate",
+    videoId: "TU8QYVW0gDU",
+    thumbnail: "https://i.ytimg.com/vi/TU8QYVW0gDU/hqdefault.jpg",
+  },
+  {
+    id: 39,
+    name: "Ab Wheel Rollouts",
+    muscle: "Core",
+    difficulty: "Advanced",
+    videoId: "JecU7nSgL0A",
+    thumbnail: "https://i.ytimg.com/vi/JecU7nSgL0A/hqdefault.jpg",
+  },
+  {
+    id: 40,
+    name: "Medicine Ball Slams",
+    muscle: "Full Body",
+    difficulty: "Intermediate",
+    videoId: "bfZetoOPpig",
+    thumbnail: "https://i.ytimg.com/vi/bfZetoOPpig/hqdefault.jpg",
   },
 ];
 
