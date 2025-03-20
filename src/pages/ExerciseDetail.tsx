@@ -1,18 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Clock, BarChart, Save, ThumbsUp } from "lucide-react";
+import { ArrowLeft, Maximize, Repeat, ThumbsUp, Save, SkipBack, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 
-// Demo exercise data (extensively expanded with more exercises)
 const exercisesData = [
   {
     id: 1,
     name: "Barbell Bench Press",
     muscle: "Chest",
     difficulty: "Intermediate",
-    videoId: "rT7DgCr-3pg",
+    videoId: "gRVjAtPip0Y",
     instructions: [
       "Lie on a flat bench with your feet flat on the floor.",
       "Grip the barbell slightly wider than shoulder-width apart.",
@@ -32,7 +31,7 @@ const exercisesData = [
     name: "Pull-ups",
     muscle: "Back",
     difficulty: "Intermediate",
-    videoId: "eGo4IYlbE5g",
+    videoId: "XB_7En-zf_M",
     instructions: [
       "Hang from a pull-up bar with an overhand grip, hands slightly wider than shoulder-width.",
       "Pull your body up until your chin is over the bar.",
@@ -51,7 +50,7 @@ const exercisesData = [
     name: "Squats",
     muscle: "Legs",
     difficulty: "Beginner",
-    videoId: "YaXPRqUwItQ",
+    videoId: "SW_C1A-rejs",
     instructions: [
       "Stand with feet shoulder-width apart.",
       "Lower your body by bending your knees and hips, as if sitting in a chair.",
@@ -71,7 +70,7 @@ const exercisesData = [
     name: "Deadlift",
     muscle: "Back",
     difficulty: "Advanced",
-    videoId: "r4MzxtBKyNE",
+    videoId: "ytGaGIn3SjE",
     instructions: [
       "Stand with feet hip-width apart, toes under the bar.",
       "Bend at the hips and knees, grasp the bar with hands shoulder-width apart.",
@@ -91,7 +90,7 @@ const exercisesData = [
     name: "Overhead Press",
     muscle: "Shoulders",
     difficulty: "Intermediate",
-    videoId: "2yjwXTZQDDI",
+    videoId: "QAQ64hK4Xxs",
     instructions: [
       "Stand with feet shoulder-width apart, holding a barbell at shoulder level.",
       "Press the bar overhead until your arms are fully extended.",
@@ -110,7 +109,7 @@ const exercisesData = [
     name: "Bent Over Rows",
     muscle: "Back",
     difficulty: "Intermediate",
-    videoId: "FWJR5Ve8UR8",
+    videoId: "kBWAon7ItDw",
     instructions: [
       "Hold a barbell with an overhand grip, hands just outside shoulder width.",
       "Bend at the hips and knees, keeping your back straight.",
@@ -130,7 +129,7 @@ const exercisesData = [
     name: "Dumbbell Lunges",
     muscle: "Legs",
     difficulty: "Beginner",
-    videoId: "D7KaRcUTQeE",
+    videoId: "3frV3RnPfOY",
     instructions: [
       "Stand with feet hip-width apart, holding dumbbells at your sides.",
       "Step forward with one leg and lower your body until both knees are bent at 90-degree angles.",
@@ -149,7 +148,7 @@ const exercisesData = [
     name: "Incline Bench Press",
     muscle: "Chest",
     difficulty: "Intermediate",
-    videoId: "SrqOu55lrYU",
+    videoId: "DbFgADa2PL8",
     instructions: [
       "Lie on an incline bench set to 15-30 degrees.",
       "Grip the barbell slightly wider than shoulder-width apart.",
@@ -169,7 +168,7 @@ const exercisesData = [
     name: "Leg Press",
     muscle: "Legs",
     difficulty: "Beginner",
-    videoId: "IZxyjW7MPJQ",
+    videoId: "GvRgijoJ2xY",
     instructions: [
       "Sit on the leg press machine with your back flat against the seat.",
       "Place your feet shoulder-width apart on the platform.",
@@ -189,7 +188,7 @@ const exercisesData = [
     name: "Lateral Raises",
     muscle: "Shoulders",
     difficulty: "Beginner",
-    videoId: "3VcKaXpzqRo",
+    videoId: "JIhbYYA1Q90",
     instructions: [
       "Stand with feet shoulder-width apart, holding dumbbells at your sides.",
       "Keep a slight bend in your elbows.",
@@ -209,7 +208,7 @@ const exercisesData = [
     name: "Tricep Pushdowns",
     muscle: "Arms",
     difficulty: "Beginner",
-    videoId: "2-LAMcpzODU",
+    videoId: "6kALZikXxLc",
     instructions: [
       "Stand facing a cable machine with a rope attachment at about chest height.",
       "Grab the rope with both hands, palms facing each other.",
@@ -229,7 +228,7 @@ const exercisesData = [
     name: "Bicep Curls",
     muscle: "Arms",
     difficulty: "Beginner",
-    videoId: "ykJmrZ5v0Oo",
+    videoId: "in7PaeYlhrM",
     instructions: [
       "Stand with feet shoulder-width apart, holding dumbbells at your sides with palms facing forward.",
       "Keep your elbows close to your sides.",
@@ -249,7 +248,7 @@ const exercisesData = [
     name: "Romanian Deadlift",
     muscle: "Legs",
     difficulty: "Intermediate",
-    videoId: "JCXUYuzwNrM",
+    videoId: "7AaaYJbCXUU",
     instructions: [
       "Stand with feet hip-width apart, holding a barbell in front of your thighs.",
       "Keep your back straight and knees slightly bent.",
@@ -269,7 +268,7 @@ const exercisesData = [
     name: "Dumbbell Flyes",
     muscle: "Chest",
     difficulty: "Intermediate",
-    videoId: "eozdVDA78K0",
+    videoId: "UKwkChzThig",
     instructions: [
       "Lie on a flat bench with a dumbbell in each hand above your chest.",
       "Lower the dumbbells out to the sides in a wide arc.",
@@ -289,7 +288,7 @@ const exercisesData = [
     name: "Face Pulls",
     muscle: "Shoulders",
     difficulty: "Intermediate",
-    videoId: "V8dZ3pyiCBo",
+    videoId: "rep-zHkHfZY",
     instructions: [
       "Set a cable pulley to slightly above head height with a rope attachment.",
       "Grab the rope with both hands, palms facing each other.",
@@ -309,7 +308,7 @@ const exercisesData = [
     name: "Calf Raises",
     muscle: "Legs",
     difficulty: "Beginner",
-    videoId: "gwLzBJYoWlI",
+    videoId: "JbyjNymZOt0",
     instructions: [
       "Stand on a raised surface like a step or calf raise machine.",
       "Place the balls of your feet on the edge with heels hanging off.",
@@ -329,7 +328,7 @@ const exercisesData = [
     name: "Chest Dips",
     muscle: "Chest",
     difficulty: "Intermediate",
-    videoId: "dX_nSOOJIsE",
+    videoId: "wjUmnZH528Y",
     instructions: [
       "Grip the parallel bars with palms facing inward.",
       "Lean your torso forward slightly to target the chest muscles.",
@@ -349,7 +348,7 @@ const exercisesData = [
     name: "Hammer Curls",
     muscle: "Arms",
     difficulty: "Beginner",
-    videoId: "zC3nLlEvin4",
+    videoId: "TwD-YGVP4Bk",
     instructions: [
       "Stand with feet shoulder-width apart, holding dumbbells at your sides with palms facing your body.",
       "Keep your elbows close to your sides.",
@@ -369,7 +368,7 @@ const exercisesData = [
     name: "Barbell Hip Thrusts",
     muscle: "Glutes",
     difficulty: "Intermediate",
-    videoId: "Zp26q4BY5HE",
+    videoId: "LM8XHLYJoYs",
     instructions: [
       "Sit on the ground with your upper back against a bench, knees bent, and feet flat on the floor.",
       "Place a padded barbell across your hips.",
@@ -389,7 +388,7 @@ const exercisesData = [
     name: "Cable Crossovers",
     muscle: "Chest",
     difficulty: "Intermediate",
-    videoId: "taI4XduLpTk",
+    videoId: "Iwe6AmxVf7o",
     instructions: [
       "Stand between two cable machines with the pulleys set high.",
       "Grab the handles with each hand and step forward slightly.",
@@ -409,7 +408,7 @@ const exercisesData = [
     name: "Mountain Climbers",
     muscle: "Core",
     difficulty: "Beginner",
-    videoId: "nmwgirgXLYM",
+    videoId: "cnyTQDSE884",
     instructions: [
       "Start in a push-up position with your arms straight and hands shoulder-width apart.",
       "Keeping your core tight, bring one knee toward your chest.",
@@ -429,7 +428,7 @@ const exercisesData = [
     name: "Kettlebell Swings",
     muscle: "Full Body",
     difficulty: "Intermediate",
-    videoId: "YSxHifyI6s8",
+    videoId: "mKDIuUbH76o",
     instructions: [
       "Stand with feet slightly wider than shoulder-width apart, holding a kettlebell with both hands.",
       "Hinge at the hips and swing the kettlebell between your legs.",
@@ -439,9 +438,9 @@ const exercisesData = [
     ],
     tips: [
       "The power comes from your hips, not your arms or shoulders.",
-      "Keep your shoulders relaxed throughout the movement.",
-      "Maintain a neutral spine position throughout the exercise.",
-      "Breathe out as you swing up, in as you swing down."
+      "Keep the bar close to your body throughout the movement.",
+      "Focus on the explosive hip extension.",
+      "Keep your shoulders relaxed throughout the movement."
     ]
   },
   {
@@ -449,7 +448,7 @@ const exercisesData = [
     name: "Dips",
     muscle: "Arms",
     difficulty: "Intermediate",
-    videoId: "2z8JmcrW-As",
+    videoId: "6kALZikXxLc",
     instructions: [
       "Hold yourself up on parallel bars with straight arms.",
       "Lower your body by bending your elbows until they reach a 90-degree angle.",
@@ -469,7 +468,7 @@ const exercisesData = [
     name: "Front Squats",
     muscle: "Legs",
     difficulty: "Intermediate",
-    videoId: "uEPLXQzyK1o",
+    videoId: "VfBOBhwXbro",
     instructions: [
       "Place a barbell on the front of your shoulders, with your fingertips under the bar.",
       "Keep your elbows high and pointing forward.",
@@ -489,7 +488,7 @@ const exercisesData = [
     name: "Good Mornings",
     muscle: "Back",
     difficulty: "Intermediate",
-    videoId: "YA-h3n9L4YU",
+    videoId: "5Xj6XUa77qc",
     instructions: [
       "Place a barbell across your upper back/traps (similar to a back squat position).",
       "With feet shoulder-width apart and knees slightly bent, hinge at the hips.",
@@ -509,7 +508,7 @@ const exercisesData = [
     name: "Hang Cleans",
     muscle: "Full Body",
     difficulty: "Advanced",
-    videoId: "WCdhjt5G9C4",
+    videoId: "YhGbXD-VIXw",
     instructions: [
       "Start standing with a barbell in your hands, arms extended.",
       "Bend your knees slightly and hinge at the hips to lower the bar to just above your knees.",
@@ -529,7 +528,7 @@ const exercisesData = [
     name: "Bulgarian Split Squats",
     muscle: "Legs",
     difficulty: "Intermediate",
-    videoId: "2C-uNgKwPLE",
+    videoId: "hPlKPjohFS0",
     instructions: [
       "Stand about two feet away from a bench, facing away from it.",
       "Place the top of one foot on the bench behind you.",
@@ -549,7 +548,7 @@ const exercisesData = [
     name: "Inverted Rows",
     muscle: "Back",
     difficulty: "Beginner",
-    videoId: "SyIBPOvNhto",
+    videoId: "hXTc1mDnZCw",
     instructions: [
       "Set up a barbell in a rack at waist height or use a Smith machine.",
       "Position yourself under the bar, gripping it with hands shoulder-width apart.",
@@ -569,7 +568,7 @@ const exercisesData = [
     name: "Push Press",
     muscle: "Shoulders",
     difficulty: "Intermediate",
-    videoId: "iaBVSJm78ko",
+    videoId: "X6-DMh-t4nQ",
     instructions: [
       "Hold a barbell at shoulder height with hands slightly wider than shoulder-width apart.",
       "Bend your knees slightly in a quarter-squat position.",
@@ -589,7 +588,7 @@ const exercisesData = [
     name: "Box Jumps",
     muscle: "Legs",
     difficulty: "Intermediate",
-    videoId: "52r_Ul5k03g",
+    videoId: "NBY9-kTuHEk",
     instructions: [
       "Stand facing a sturdy box or platform with feet shoulder-width apart.",
       "Bend into a quarter squat position and swing arms back.",
@@ -609,7 +608,7 @@ const exercisesData = [
     name: "Russian Twists",
     muscle: "Core",
     difficulty: "Beginner",
-    videoId: "wkD8rjkodUI",
+    videoId: "JyUqwkVpsi8",
     instructions: [
       "Sit on the floor with knees bent and feet raised slightly off the ground.",
       "Lean back slightly to feel your core engage.",
@@ -629,7 +628,7 @@ const exercisesData = [
     name: "Cable Lat Pulldowns",
     muscle: "Back",
     difficulty: "Beginner",
-    videoId: "OcFCHdQHjVU",
+    videoId: "CAwf7n6Luuc",
     instructions: [
       "Sit at a lat pulldown machine with thighs secured under the pads.",
       "Grasp the bar with hands wider than shoulder-width apart.",
@@ -649,7 +648,7 @@ const exercisesData = [
     name: "Reverse Lunges",
     muscle: "Legs",
     difficulty: "Beginner",
-    videoId: "rHZACn1Gixs",
+    videoId: "XRBAODXK4MW",
     instructions: [
       "Stand with feet hip-width apart, hands on hips or holding weights at sides.",
       "Step backward with one foot and lower your body until both knees are bent at 90 degrees.",
@@ -669,7 +668,7 @@ const exercisesData = [
     name: "Side Planks",
     muscle: "Core",
     difficulty: "Beginner",
-    videoId: "XeN4pEZZJNI",
+    videoId: "wqzrb67Dwf8",
     instructions: [
       "Lie on your side with legs straight and feet stacked.",
       "Prop yourself up on your forearm, with elbow directly under your shoulder.",
@@ -689,7 +688,7 @@ const exercisesData = [
     name: "Clean and Jerk",
     muscle: "Full Body",
     difficulty: "Advanced",
-    videoId: "yN48sZ3FzlI",
+    videoId: "c77CAvOJ1NM",
     instructions: [
       "Start with feet hip-width apart, barbell on the floor in front of you.",
       "Grip the bar slightly wider than shoulder-width, with a hook grip if possible.",
@@ -709,7 +708,7 @@ const exercisesData = [
     name: "Seated Cable Rows",
     muscle: "Back",
     difficulty: "Beginner",
-    videoId: "sP_4vybjVJs",
+    videoId: "GZbfZ033f74",
     instructions: [
       "Sit at a cable row machine with feet secured on the platform.",
       "Grasp the handle with both hands, arms extended.",
@@ -729,7 +728,7 @@ const exercisesData = [
     name: "Jump Rope",
     muscle: "Cardio",
     difficulty: "Beginner",
-    videoId: "FJmRQ5iTXKE",
+    videoId: "u3zgwmWjKaQ",
     instructions: [
       "Hold the handles of the jump rope with hands at hip height.",
       "Rotate your wrists to swing the rope over your head and under your feet.",
@@ -749,7 +748,7 @@ const exercisesData = [
     name: "Burpees",
     muscle: "Full Body",
     difficulty: "Intermediate",
-    videoId: "TU8QYVW0gDU",
+    videoId: "auBLPXO8Fww",
     instructions: [
       "Stand with feet shoulder-width apart.",
       "Squat down and place hands on the floor in front of you.",
@@ -769,7 +768,7 @@ const exercisesData = [
     name: "Ab Wheel Rollouts",
     muscle: "Core",
     difficulty: "Advanced",
-    videoId: "JecU7nSgL0A",
+    videoId: "rqiTPdK1c_I",
     instructions: [
       "Kneel on the floor holding an ab wheel with both hands.",
       "Place the wheel on the floor in front of you with arms extended.",
@@ -789,7 +788,7 @@ const exercisesData = [
     name: "Medicine Ball Slams",
     muscle: "Full Body",
     difficulty: "Intermediate",
-    videoId: "bfZetoOPpig",
+    videoId: "kvz8kQ_gNdE",
     instructions: [
       "Stand with feet shoulder-width apart, holding a medicine ball with both hands.",
       "Raise the ball overhead, extending onto your toes.",
@@ -809,6 +808,7 @@ const exercisesData = [
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const exerciseId = parseInt(id || "1");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const exercise = exercisesData.find(ex => ex.id === exerciseId);
   
@@ -822,6 +822,36 @@ const ExerciseDetail = () => {
       </div>
     );
   }
+
+  const prevExercise = exercisesData.find(ex => ex.id === exerciseId - 1);
+  const nextExercise = exercisesData.find(ex => ex.id === exerciseId + 1);
+
+  const toggleFullscreen = () => {
+    const videoElement = document.getElementById('exercise-video');
+    if (!videoElement) return;
+
+    if (!isFullscreen) {
+      if (videoElement.requestFullscreen) {
+        videoElement.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const replayVideo = () => {
+    const iframe = document.getElementById('exercise-video') as HTMLIFrameElement;
+    if (iframe && iframe.src) {
+      iframe.src = iframe.src;
+    }
+    toast({
+      title: "Video replaying",
+      description: "The video is being replayed from the beginning.",
+    });
+  };
 
   const addToWorkout = () => {
     toast({
@@ -841,12 +871,48 @@ const ExerciseDetail = () => {
       
       <div className="aspect-video bg-black relative">
         <iframe 
-          src={`https://www.youtube.com/embed/${exercise.videoId}`}
+          id="exercise-video"
+          src={`https://www.youtube.com/embed/${exercise.videoId}?rel=0&modestbranding=1`}
           title={exercise.name}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           allowFullScreen
           className="w-full h-full"
         ></iframe>
+        <div className="absolute bottom-4 right-4 flex gap-2">
+          <Button 
+            variant="secondary" 
+            size="icon" 
+            className="bg-black/50 hover:bg-black/70 text-white"
+            onClick={toggleFullscreen}
+          >
+            <Maximize size={20} />
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="icon" 
+            className="bg-black/50 hover:bg-black/70 text-white"
+            onClick={replayVideo}
+          >
+            <Repeat size={20} />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="flex justify-between px-4 pt-2">
+        {prevExercise ? (
+          <Link to={`/exercise/${prevExercise.id}`} className="flex items-center text-sm text-blue-400">
+            <SkipBack size={16} className="mr-1" /> Previous
+          </Link>
+        ) : (
+          <div></div>
+        )}
+        {nextExercise ? (
+          <Link to={`/exercise/${nextExercise.id}`} className="flex items-center text-sm text-blue-400">
+            Next <SkipForward size={16} className="ml-1" />
+          </Link>
+        ) : (
+          <div></div>
+        )}
       </div>
       
       <div className="p-4">
