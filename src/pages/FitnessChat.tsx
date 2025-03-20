@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/lib/supabase";
+import { findResponse } from "@/utils/fitnessKnowledge";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
@@ -53,20 +53,16 @@ const FitnessChat = () => {
     }
   }, [isMobile]);
 
-  // Function to test the connection to the Edge Function
+  // Function to test the local knowledge base
   const testConnection = async () => {
     setIsLoading(true);
     setApiError(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke("fitness-chatbot", {
-        body: {
-          messages: [{ role: "user", content: "hello" }],
-        },
-      });
-
-      if (error) {
-        throw new Error(error.message);
+      const response = findResponse("hello");
+      
+      if (!response) {
+        throw new Error("Failed to get a response");
       }
 
       toast({
@@ -113,31 +109,24 @@ const FitnessChat = () => {
     ]);
 
     try {
-      const { data, error } = await supabase.functions.invoke("fitness-chatbot", {
-        body: {
-          messages: [
-            ...messages.filter(m => m.id !== "welcome" && m.id !== "typing-indicator").map(m => ({ role: m.role, content: m.content })),
-            { role: "user", content: input.trim() },
-          ],
-        },
-      });
+      // Short delay to simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Get response from local knowledge base
+      const responseContent = findResponse(input.trim());
 
       // Remove typing indicator
       setMessages((prev) => prev.filter(m => m.id !== "typing-indicator"));
 
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (data?.message) {
-        const assistantMessage: Message = {
-          id: `assistant-${Date.now()}`,
-          role: "assistant",
-          content: data.message.content,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      }
+      // Add assistant response
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content: responseContent,
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
       
@@ -152,7 +141,7 @@ const FitnessChat = () => {
       };
       setMessages((prev) => [...prev, errorMessage]);
       
-      setApiError("Failed to connect to the assistant service. Please try again later.");
+      setApiError("Failed to get a response. Please try again.");
       toast({
         title: "Error",
         description: "Failed to get a response. Please try again.",
@@ -234,7 +223,7 @@ const FitnessChat = () => {
         </Link>
         <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold flex items-center gap-2`}>
           <Dumbbell className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
-          Fitness & Anatomy Chat
+          AI Fitness Assistant
         </h1>
         <div className="flex-1"></div>
         {!isMobile && (
@@ -250,7 +239,7 @@ const FitnessChat = () => {
             ) : (
               <RefreshCw size={16} className="mr-1" />
             )}
-            Test Connection
+            Test AI
           </Button>
         )}
       </header>
