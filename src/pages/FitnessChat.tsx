@@ -62,20 +62,26 @@ const FitnessChat = () => {
     setApiError(null);
     
     try {
+      console.log("Testing AI connection...");
       const { data, error } = await supabase.functions.invoke('fitness-ai-chat', {
         body: {
-          messages: [{ role: 'user', content: 'Hello, are you working?' }]
+          messages: [{ role: 'user', content: 'Quick test: Is this connection working?' }]
         }
       });
 
+      console.log("Connection test response:", data);
+      
       if (error) {
+        console.error("Connection test error from Supabase:", error);
         throw new Error(error.message);
       }
 
       if (!data || !data.message) {
+        console.error("No response data:", data);
         throw new Error('No response from AI service');
       }
 
+      // Successfully connected to online AI
       setUsingOnlineAI(true);
       setConnectionTested(true);
       toast({
@@ -98,6 +104,7 @@ const FitnessChat = () => {
         toast({
           title: "Using Local Knowledge Base",
           description: "Online AI unavailable. Using built-in knowledge instead.",
+          variant: "destructive"
         });
       } catch (localError) {
         console.error("Local knowledge base error:", localError);
@@ -145,6 +152,8 @@ const FitnessChat = () => {
       // Try online AI first if previously successful or if connection hasn't been tested yet
       if (usingOnlineAI || !connectionTested) {
         try {
+          console.log("Attempting to use online AI...");
+          
           const chatMessages = messages
             .filter(m => m.id !== "typing-indicator" && m.id !== "welcome")
             .map(m => ({ role: m.role, content: m.content }));
@@ -155,11 +164,25 @@ const FitnessChat = () => {
           // Keep only the last 10 messages to avoid token limits
           const recentMessages = chatMessages.slice(-10);
           
+          console.log("Sending messages to AI:", 
+            recentMessages.map(m => ({ role: m.role, content: m.content.substring(0, 20) + '...' })));
+          
           const { data, error } = await supabase.functions.invoke('fitness-ai-chat', {
             body: { messages: recentMessages }
           });
 
-          if (error) throw error;
+          console.log("AI response received:", data);
+          
+          if (error) {
+            console.error("Error from Supabase function:", error);
+            throw error;
+          }
+          
+          if (!data || !data.message || !data.message.content) {
+            console.error("Invalid response format:", data);
+            throw new Error("Invalid response format from AI service");
+          }
+          
           responseContent = data.message.content;
           
           // If this is the first successful connection, update the state
@@ -169,6 +192,18 @@ const FitnessChat = () => {
           }
         } catch (error) {
           console.error("Online AI error:", error);
+          
+          // If error.message contains the text about OPENAI_API_KEY, show a specific message
+          if (error.message && error.message.includes('OPENAI_API_KEY')) {
+            toast({
+              title: "OpenAI API Key Missing",
+              description: "The OpenAI API key is not configured in Supabase. Please contact the administrator.",
+              variant: "destructive",
+              duration: 5000,
+            });
+            setApiError("The OpenAI API key is not configured. Please add it in the Supabase dashboard under Edge Functions > Secrets.");
+          }
+          
           // If online AI fails, fall back to local knowledge base
           responseContent = findResponse(input.trim());
           setUsingOnlineAI(false);
@@ -191,7 +226,7 @@ const FitnessChat = () => {
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
-        content: responseContent,
+        content: responseContent || "I'm having trouble understanding. Could you try rephrasing your question?",
         timestamp: new Date(),
       };
       

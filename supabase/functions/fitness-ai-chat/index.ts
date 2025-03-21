@@ -39,8 +39,13 @@ serve(async (req) => {
       throw new Error('Invalid messages format');
     }
 
-    console.log('Processing fitness AI chat request with messages:', 
-      messages.map(m => ({ role: m.role, content: m.content.substring(0, 50) + '...' })));
+    // Improved logging with more detail
+    console.log('Processing fitness AI chat request:', JSON.stringify({
+      messageCount: messages.length,
+      lastMessagePreview: messages.length > 0 ? 
+        `${messages[messages.length-1].role}: ${messages[messages.length-1].content.substring(0, 50)}...` : 
+        'No messages'
+    }));
 
     const openAIMessages = [
       { role: 'system', content: SYSTEM_PROMPT },
@@ -90,9 +95,10 @@ serve(async (req) => {
     console.error('Error in fitness-ai-chat function:', error);
     return new Response(
       JSON.stringify({ 
+        error: true,
         message: {
           role: 'assistant',
-          content: "I encountered an error processing your request. Please try again later."
+          content: "I encountered an error processing your request. Please try again later. Error details: " + error.message
         }
       }),
       {
