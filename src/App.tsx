@@ -12,6 +12,8 @@ import Exercises from "./pages/Exercises";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import WorkoutLog from "./pages/WorkoutLog";
 import FitnessChat from "./pages/FitnessChat";
+import Dashboard from "./pages/Dashboard";
+import ProgressTracking from "./pages/ProgressTracking";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/exercise/:id" element={<ExerciseDetail />} />
           <Route path="/workout-log" element={<WorkoutLog />} />
           <Route path="/fitness-chat" element={<FitnessChat />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/progress-tracking" element={<ProgressTracking />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
