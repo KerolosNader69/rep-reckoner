@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Send, Dumbbell, RefreshCw } from "lucide-react";
@@ -26,6 +27,7 @@ const FitnessChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [usingOnlineAI, setUsingOnlineAI] = useState(false);
+  const [connectionTested, setConnectionTested] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
@@ -36,7 +38,7 @@ const FitnessChat = () => {
       {
         id: "welcome",
         role: "assistant",
-        content: "Hello! I'm your AI fitness and anatomy coach. Ask me anything about workouts, muscle groups, exercise techniques, nutrition, or fitness coaching!",
+        content: "Hello! I'm your AI fitness and anatomy coach. Ask me about workout techniques, exercise programming, nutrition strategies, or coaching advice. Toggle between online AI (comprehensive) and local knowledge base (basic) using the button above.",
         timestamp: new Date(),
       },
     ]);
@@ -75,9 +77,10 @@ const FitnessChat = () => {
       }
 
       setUsingOnlineAI(true);
+      setConnectionTested(true);
       toast({
         title: "Connection Successful",
-        description: "The online AI fitness coach is ready to use!",
+        description: "The comprehensive AI fitness coach is ready to use!",
       });
     } catch (error) {
       console.error("Online AI connection test error:", error);
@@ -91,6 +94,7 @@ const FitnessChat = () => {
         }
         
         setUsingOnlineAI(false);
+        setConnectionTested(true);
         toast({
           title: "Using Local Knowledge Base",
           description: "Online AI unavailable. Using built-in knowledge instead.",
@@ -138,8 +142,8 @@ const FitnessChat = () => {
     try {
       let responseContent;
       
-      // Try online AI first if previously successful
-      if (usingOnlineAI) {
+      // Try online AI first if previously successful or if connection hasn't been tested yet
+      if (usingOnlineAI || !connectionTested) {
         try {
           const chatMessages = messages
             .filter(m => m.id !== "typing-indicator" && m.id !== "welcome")
@@ -157,11 +161,18 @@ const FitnessChat = () => {
 
           if (error) throw error;
           responseContent = data.message.content;
+          
+          // If this is the first successful connection, update the state
+          if (!connectionTested) {
+            setUsingOnlineAI(true);
+            setConnectionTested(true);
+          }
         } catch (error) {
           console.error("Online AI error:", error);
           // If online AI fails, fall back to local knowledge base
           responseContent = findResponse(input.trim());
           setUsingOnlineAI(false);
+          setConnectionTested(true);
           toast({
             title: "Fallback to Local Knowledge",
             description: "Online AI unavailable. Using built-in knowledge.",
@@ -220,14 +231,19 @@ const FitnessChat = () => {
 
   // Toggle between online AI and local knowledge base
   const toggleAIMode = () => {
-    setUsingOnlineAI(prev => !prev);
-    toast({
-      title: usingOnlineAI ? "Using Local Knowledge Base" : "Using Online AI",
-      description: usingOnlineAI 
-        ? "Switched to built-in knowledge. Responses may be more limited." 
-        : "Switched to online AI. Responses will be more comprehensive.",
-      duration: 3000,
-    });
+    if (connectionTested) {
+      setUsingOnlineAI(prev => !prev);
+      toast({
+        title: usingOnlineAI ? "Using Local Knowledge Base" : "Using Online AI",
+        description: usingOnlineAI 
+          ? "Switched to built-in knowledge. Responses may be more limited." 
+          : "Switched to online AI. Responses will be more comprehensive.",
+        duration: 3000,
+      });
+    } else {
+      // If connection hasn't been tested yet, test it
+      testConnection();
+    }
   };
 
   // Render loading skeleton for typing indicator
@@ -293,7 +309,7 @@ const FitnessChat = () => {
         </Link>
         <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold flex items-center gap-2`}>
           <Dumbbell className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-emerald-400`} />
-          AI Fitness Coach
+          AI Fitness Coach & Trainer
         </h1>
         <div className="flex-1"></div>
         
@@ -305,22 +321,25 @@ const FitnessChat = () => {
               onClick={toggleAIMode}
               className={`${usingOnlineAI ? 'text-green-400 border-green-500' : 'text-amber-400 border-amber-500'} hover:bg-gray-800`}
             >
-              {usingOnlineAI ? 'Using Online AI' : 'Using Local Knowledge'}
+              {!connectionTested ? 'Test AI Connection' : 
+                usingOnlineAI ? 'Using Comprehensive AI' : 'Using Basic Knowledge'}
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={testConnection} 
-              disabled={isLoading}
-              className="text-blue-400 border-blue-500 hover:bg-blue-950"
-            >
-              {isLoading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-              ) : (
-                <RefreshCw size={16} className="mr-1" />
-              )}
-              Test AI Connection
-            </Button>
+            {!connectionTested && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={testConnection} 
+                disabled={isLoading}
+                className="text-blue-400 border-blue-500 hover:bg-blue-950"
+              >
+                {isLoading ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+                ) : (
+                  <RefreshCw size={16} className="mr-1" />
+                )}
+                Test AI Connection
+              </Button>
+            )}
           </div>
         )}
       </header>
@@ -349,7 +368,7 @@ const FitnessChat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isMobile ? "Ask about fitness..." : "Ask about workout techniques, coaching, or fitness advice..."}
+            placeholder={isMobile ? "Ask your fitness coach..." : "Ask about workout programming, nutrition advice, or exercise technique..."}
             className="flex-1 bg-gray-800/50 backdrop-blur-sm border-gray-700/50 focus-visible:ring-blue-500 text-white"
             disabled={isLoading}
           />
