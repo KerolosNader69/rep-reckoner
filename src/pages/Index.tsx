@@ -9,7 +9,7 @@ const Index = () => {
       <header className="bg-gray-800/50 backdrop-blur-sm p-6 border-b border-gray-700/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gradient bg-gradient-to-r from-blue-400 to-indigo-500">Fitness App</h1>
+            <h1 className="text-3xl font-bold text-gradient bg-gradient-to-r from-blue-400 to-indigo-500">Rep Reckoner</h1>
             <p className="text-gray-400 mt-1">Your path to a healthier you</p>
           </div>
           <div className="hidden md:flex space-x-3">
@@ -56,10 +56,6 @@ const Index = () => {
                 <BarChart3 className="h-5 w-5 text-green-400" />
                 <span className="font-medium">Progress Tracking</span>
               </Link>
-              <Link to="/exercises" className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/60 hover:bg-purple-600/20 transition-colors">
-                <Dumbbell className="h-5 w-5 text-purple-400" />
-                <span className="font-medium">Exercises</span>
-              </Link>
               <Link to="/workout-log" className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/60 hover:bg-red-600/20 transition-colors">
                 <Rocket className="h-5 w-5 text-red-400" />
                 <span className="font-medium">Workout Log</span>
@@ -75,20 +71,20 @@ const Index = () => {
             <h2 className="text-2xl font-semibold mb-4 text-gradient bg-gradient-to-r from-indigo-400 to-purple-500">Features</h2>
             <ul className="text-gray-300 space-y-3 mb-4">
               <li className="flex items-center gap-2 p-3 rounded-lg bg-gray-800/60">
-                <Flame className="h-5 w-5 text-amber-400" />
-                <span>Personalized workout plans</span>
-              </li>
-              <li className="flex items-center gap-2 p-3 rounded-lg bg-gray-800/60">
                 <BarChart3 className="h-5 w-5 text-green-400" />
                 <span>Detailed progress tracking</span>
               </li>
               <li className="flex items-center gap-2 p-3 rounded-lg bg-gray-800/60">
-                <Dumbbell className="h-5 w-5 text-purple-400" />
-                <span>Exercise library with tutorials</span>
+                <Heart className="h-5 w-5 text-red-400" />
+                <span>Personalized nutrition guidance</span>
               </li>
               <li className="flex items-center gap-2 p-3 rounded-lg bg-gray-800/60">
-                <Heart className="h-5 w-5 text-red-400" />
-                <span>Nutrition & recovery guidance</span>
+                <Flame className="h-5 w-5 text-amber-400" />
+                <span>Recovery & injury prevention</span>
+              </li>
+              <li className="flex items-center gap-2 p-3 rounded-lg bg-gray-800/60">
+                <Users className="h-5 w-5 text-blue-400" />
+                <span>AI-powered coaching</span>
               </li>
             </ul>
           </div>
@@ -109,7 +105,7 @@ const Index = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Star className="h-4 w-4 text-yellow-400" />
-                AI workout recommendations
+                Custom nutrition plans
               </li>
             </ul>
             <Link to="/dashboard" className="inline-block w-full py-3 px-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition-all font-semibold text-white shadow-lg hover:shadow-blue-600/20 text-center">
@@ -120,22 +116,22 @@ const Index = () => {
 
         {/* Featured section */}
         <div className="mt-12 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-8 border border-gray-700/50 shadow-lg animate-fade-in">
-          <h2 className="text-3xl font-bold mb-6 text-gradient bg-gradient-to-r from-purple-400 to-pink-400 text-center">Why Choose Our Fitness App?</h2>
+          <h2 className="text-3xl font-bold mb-6 text-gradient bg-gradient-to-r from-purple-400 to-pink-400 text-center">Why Choose Rep Reckoner?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="bg-gray-800/60 p-6 rounded-xl border border-gray-700/50 hover:border-purple-500/30 transition-all hover:-translate-y-1 duration-300">
-              <Dumbbell className="h-10 w-10 text-purple-400 mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-gradient bg-gradient-to-r from-purple-400 to-pink-400">Expert Guidance</h3>
-              <p className="text-gray-300">Access professionally designed workouts and expert advice tailored to your fitness level.</p>
+              <BarChart3 className="h-10 w-10 text-purple-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-2 text-gradient bg-gradient-to-r from-purple-400 to-pink-400">Precise Tracking</h3>
+              <p className="text-gray-300">Track every rep, set, and weight with precision to visualize your progress over time.</p>
             </div>
             <div className="bg-gray-800/60 p-6 rounded-xl border border-gray-700/50 hover:border-blue-500/30 transition-all hover:-translate-y-1 duration-300">
-              <BarChart3 className="h-10 w-10 text-blue-400 mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-gradient bg-gradient-to-r from-blue-400 to-cyan-400">Track Progress</h3>
-              <p className="text-gray-300">Visualize your improvements with detailed analytics and progress tracking tools.</p>
+              <Heart className="h-10 w-10 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-2 text-gradient bg-gradient-to-r from-blue-400 to-cyan-400">Nutrition Science</h3>
+              <p className="text-gray-300">Get personalized meal plans based on your body metrics, goals, and dietary preferences.</p>
             </div>
             <div className="bg-gray-800/60 p-6 rounded-xl border border-gray-700/50 hover:border-amber-500/30 transition-all hover:-translate-y-1 duration-300">
-              <Heart className="h-10 w-10 text-red-400 mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-gradient bg-gradient-to-r from-red-400 to-amber-400">Holistic Approach</h3>
-              <p className="text-gray-300">Balance workouts with nutrition guidance and recovery tips for optimal results.</p>
+              <MessageCircle className="h-10 w-10 text-red-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-2 text-gradient bg-gradient-to-r from-red-400 to-amber-400">AI Coaching</h3>
+              <p className="text-gray-300">Get personalized advice and answers to all your fitness questions from our AI coach.</p>
             </div>
           </div>
         </div>
@@ -143,7 +139,7 @@ const Index = () => {
 
       <footer className="bg-gray-900 p-6 border-t border-gray-800">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-400 text-sm">© 2023 Fitness App. All rights reserved.</p>
+          <p className="text-gray-400 text-sm">© 2023 Rep Reckoner. All rights reserved.</p>
           <div className="flex justify-center space-x-4 mt-4">
             <Link to="/about" className="text-gray-400 hover:text-white transition-colors text-sm">About</Link>
             <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors text-sm">Privacy Policy</Link>
