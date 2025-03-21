@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Rocket, Flame, User, Users, LayoutDashboard, BarChart3, Dumbbell, CircleUser } from 'lucide-react';
+import { Rocket, Flame, User, Users, LayoutDashboard, BarChart3, Dumbbell, CircleUser, ArrowRight } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -14,6 +14,25 @@ const Index = () => {
       </header>
 
       <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+        {/* Hero section with welcome message and login/signup */}
+        <div className="mb-10 animate-fade-in">
+          <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-8 border border-gray-700/50 shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
+            <h2 className="text-3xl font-bold mb-4 text-gradient bg-gradient-to-r from-blue-400 to-indigo-500">Welcome</h2>
+            <p className="text-gray-300 mb-6 text-lg max-w-2xl mx-auto">
+              Start your fitness journey with our comprehensive tools designed to help you achieve your goals.
+              Track your progress, discover new exercises, and get personalized recommendations.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+              <Link to="/login" className="flex items-center justify-center gap-2 py-3 px-6 rounded-lg bg-blue-600 hover:bg-blue-500 transition-all font-semibold text-white shadow-lg hover:shadow-blue-600/30 hover:-translate-y-1 duration-300">
+                Login <ArrowRight className="h-5 w-5" />
+              </Link>
+              <Link to="/signup" className="flex items-center justify-center gap-2 py-3 px-6 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all font-semibold text-white shadow-lg hover:shadow-indigo-600/30 hover:-translate-y-1 duration-300">
+                Sign Up <User className="h-5 w-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-6 border border-gray-700/50 shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
             <h2 className="text-2xl font-semibold mb-4 text-gradient bg-gradient-to-r from-blue-400 to-indigo-500">Get Started</h2>
@@ -56,12 +75,25 @@ const Index = () => {
             </nav>
           </div>
           
-          <div className="md:col-span-2 lg:col-span-1 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-6 border border-gray-700/50 shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
-            <h2 className="text-2xl font-semibold mb-4 text-gradient bg-gradient-to-r from-blue-400 to-cyan-400">Welcome</h2>
+          <div className="md:col-span-2 lg:col-span-1 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-xl p-6 border border-gray-700/50 shadow-lg hover:shadow-blue-500/5 transition-all duration-300 hover-lift">
+            <h2 className="text-2xl font-semibold mb-4 text-gradient bg-gradient-to-r from-blue-400 to-cyan-400">Features</h2>
             <p className="text-gray-300 mb-4">
-              Start your fitness journey with our comprehensive tools designed to help you achieve your goals.
-              Track your progress, discover new exercises, and get personalized recommendations.
+              Our app provides everything you need to achieve your fitness goals:
             </p>
+            <ul className="text-gray-300 space-y-2 mb-4">
+              <li className="flex items-center gap-2">
+                <Flame className="h-4 w-4 text-amber-400" />
+                Personalized workout plans
+              </li>
+              <li className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-green-400" />
+                Detailed progress tracking
+              </li>
+              <li className="flex items-center gap-2">
+                <Dumbbell className="h-4 w-4 text-purple-400" />
+                Exercise library with tutorials
+              </li>
+            </ul>
             <Link to="/dashboard" className="inline-block py-3 px-6 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition-all font-semibold text-white shadow-lg hover:shadow-blue-600/20">
               Explore Now
             </Link>
