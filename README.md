@@ -1,69 +1,66 @@
-# Welcome to your Lovable project
+<h1 align="center">Rep Reckoner</h1>
 
-## Project info
+<p align="center">
+  <strong>An AI fitness coach in your pocket</strong><br>
+  <sub>Personalised workouts, an AI coach chat, nutrition and progress tracking</sub>
+</p>
 
-**URL**: https://lovable.dev/projects/da8600a0-eebc-4182-a39a-8d3ac6c4df16
+<p align="center">
+  <img src="https://img.shields.io/badge/React-1d1d26?style=for-the-badge&logo=react&logoColor=FFD60A" alt="React" />
+  <img src="https://img.shields.io/badge/Capacitor-1d1d26?style=for-the-badge&logo=capacitor&logoColor=FFD60A" alt="Capacitor" />
+  <img src="https://img.shields.io/badge/Supabase-1d1d26?style=for-the-badge&logo=supabase&logoColor=FFD60A" alt="Supabase" />
+  <img src="https://img.shields.io/badge/TypeScript-1d1d26?style=for-the-badge&logo=typescript&logoColor=FFD60A" alt="TypeScript" />
+</p>
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## The problem
 
-**Use Lovable**
+Generic workout plans ignore the person doing them. Rep Reckoner adapts training to each user and answers fitness questions in plain language.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/da8600a0-eebc-4182-a39a-8d3ac6c4df16) and start prompting.
+## Features
 
-Changes made via Lovable will be committed automatically to this repo.
+| Screen | What it does |
+|:--|:--|
+| Dashboard | Overview of the user's training |
+| Workout recommendations | AI-generated plans from the user's profile and goals |
+| AI Coach & Fitness Chat | Conversational coaching and Q&A |
+| Exercises | Exercise library with detail pages and a workout guide |
+| Workout log | Record sessions, sets and reps |
+| Progress tracking | Charts of progress over time |
+| Nutrition calculator | Daily nutrition estimates |
+| Auth | Sign up and log in with Supabase Auth |
 
-**Use your preferred IDE**
+## How it works
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend:** React + TypeScript + Vite with Tailwind CSS and shadcn/ui components, React Router, TanStack Query and Recharts.
+- **Mobile:** packaged for Android and iOS with Capacitor.
+- **Backend:** Supabase for auth and data, plus three Supabase Edge Functions (`workout-recommendations`, `fitness-chatbot`, `fitness-ai-chat`) that call an LLM so API keys never reach the client.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Project structure
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```text
+src/
+  pages/           Dashboard, AiCoach, FitnessChat, Exercises, ExerciseDetail,
+                   WorkoutLog, ProgressTracking, Login, SignUp
+  components/      WorkoutRecommendations, WorkoutGuide, NutritionCalculator, ui/
+  integrations/    Supabase client and generated types
+supabase/
+  functions/       workout-recommendations · fitness-chatbot · fitness-ai-chat
+capacitor.config.ts
 ```
 
-**Edit a file directly in GitHub**
+## Run locally
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm install
+npm run dev          # web app with Vite
+npm run build        # production build into dist/
+npx cap sync         # copy the build into the Android / iOS projects
+```
 
-**Use GitHub Codespaces**
+The Edge Functions read `OPENAI_API_KEY` from the Supabase project's secrets.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Author
 
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/da8600a0-eebc-4182-a39a-8d3ac6c4df16) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Built by **[Kerollos Nader](https://github.com/KerolosNader69)**.
